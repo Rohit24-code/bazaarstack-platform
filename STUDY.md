@@ -91,3 +91,89 @@ Modern Note: In modern versions of TypeScript, "baseUrl" is deprecated for path 
 6. Master Sync Re-IndexSynchronize global file trees, link workspace components, and lock fresh version targets into your root snapshot:Bashpnpm install
    🧠 VS Code Memory Flush FixIf you write or rewrite path aliasing strings, convert components from radix-ui to atomic packages, or update types, your text editor's background index thread can occasionally display outdated red errors. Flush it cleanly with these keystrokes:Click into any .ts or .tsx file inside your active window.Press Ctrl + Shift + P (or Cmd + Shift + P on Mac).Type: TypeScript: Restart TS Server and hit Enter.📈 The Interview Narrative PitchWhen an interviewer views your monorepo repository and asks: "Explain your layout choices and architecture strategy for this e-commerce project," deliver this high-signal answer:_"When structuring the platform architecture for BazaarStack, I consciously avoided a traditional mixed monolith where customer storefront views and administrative dashboard modules are bound together under a single deployment target. Doing so introduces a dangerous blast radius where a heavy analytical processing error on the admin panel could compromise customer checkout conversions.To decouple our operational risk, I federated the architecture into distinct runtime applications managed by a single Turborepo and pnpm workspaces environment. To maximize layout synchronization across our public shop and back-office management grids without maintaining duplicate code, I extracted our presentational primitives—like shared buttons, input fields, and dialog structures—into an internal private component library package called @ecom/ui-core.Both applications inherit these tokens natively via zero-overhead local workspace links. This guarantees full design continuity, enforces strict boundary isolation, and maintains exceptionally fast compile pipelines via parallel task-caching directly down our deployment chains."_
 ```
+
+<!-- DAY 2 -->
+
+1. The Big Picture: What We Built
+   Instead of a standard "monolith" (where everything is thrown into one single app folder), you built a Federated Monorepo Architecture.
+
+apps/store-client: The actual web store frontend app (built with Vite). It consumes your shared code.
+
+packages/ui-core: A shared local workspace package containing all your reusable visual Shadcn components.
+
+packages/api-client: A shared local workspace package holding your central Axios network orchestration layers.
+
+pnpm Workspaces: The management system that tells your computer these folders belong to the same project.
+
+2. The Errors We Defeated & What They Mean
+   Let's look at the timeline of your errors. Every single one was a logical side effect of these systems trying to communicate for the first time.
+
+🚨 Error 1: Missing TypeScript Types inside ui-core
+“Could not find a declaration file for module 'react'...”
+
+Why it happened: Your main app (store-client) knew what React was, but your newly created local packages/ui-core folder was completely blank. TypeScript looked inside it and said, "Hey, you gave me React components here, but this folder doesn't have the React dictionary files to prove what types of data are allowed."
+
+How we solved it: We used pnpm --filter @ecom/ui-core add -D @types/react @types/react-dom. The --filter tag is a crucial keyword—it allowed us to stay at the root folder but inject the type definitions specifically into the UI package manifest without writing anything manually.
+
+🚨 Error 2: The Missing Link (ts(2307))
+“Cannot find module '@ecom/ui-core' or its corresponding type declarations.”
+
+Why it happened: You looked inside store-client/package.json and noticed @ecom/ui-core wasn't listed under dependencies. The codebase was trying to import from an internal package that wasn't officially mapped.
+
+How we solved it: We manually declared "@ecom/ui-core": "workspace:\*" inside the dependencies block. This explicitly tells the package manager: "Don't fetch this package from the public internet. Look on my local desktop hard drive for a package with that name."
+
+🚨 Error 3: The CommonJS vs. ESM Conflict (ts(1470))
+“The 'import.meta' meta-property is not allowed in files which will build into CommonJS output.”
+
+Why it happened: Inside your ui-core Vite config, we originally used import.meta.url to figure out where files were on your computer. But the package's TypeScript settings were configured to compile code into CommonJS (the legacy Node format). CommonJS has no idea what import.meta is because it's a modern ES Module (ESM) feature.
+
+How we solved it: We stripped out import.meta completely and switched to a clean, universal path resolution approach: const \_\_dirname = path.resolve(). This works perfectly regardless of the compiler rules.
+
+🚨 Error 4: The Turborepo Guardrails
+“Missing packageManager field... Could not find turbo.json”
+
+Why it happened: Turborepo is the orchestration engine that runs your project. It woke up and refused to run because of two missing pieces: it didn't know which manager version ran the workspace (packageManager), and it didn't have a task blueprint (turbo.json) telling it how to build dependencies.
+
+How we solved it: We declared "packageManager": "pnpm@10.33.0" at the absolute root package.json and created a turbo.json blueprint mapping out how build and dev scripts should pass assets downstream.
+
+3. The Grand Finale: Demystifying Vite & Path Aliases
+   The longest battle we fought was over this line printed by Vite:
+
+“Failed to resolve import "@/lib/utils" in .../ui-core/src/components/ui/dialog.tsx. Does the file exist?”
+
+Understanding this requires understanding how Vite and path aliasing operate at an enterprise level.
+
+What is an Alias (@/\*)?
+When Shadcn installs a component, it writes paths like import { cn } from "@/lib/utils". The @/ is a shortcut meaning "start looking from the root src folder".
+
+Why did it crash the Monorepo?
+Vite was booting up inside apps/store-client. When it evaluated your storefront pages and stepped out of that folder to grab a button or dialog component from packages/ui-core, Vite parsed the file text. It saw @/lib/utils and thought: "I am running inside store-client, so @/ must mean look inside store-client/src/lib/utils!" But that utility function only existed inside the UI core package folder! Vite was looking in the wrong project container, failed to find it, and asked: "Does the file exist?"
+
+The Solution Matrix We Wrote
+We fixed this by writing a Context-Aware Path Resolver right inside your master configuration (apps/store-client/vite.config.ts).
+
+We passed a regex matcher to Vite's alias configurations with a customResolver hook:
+
+TypeScript
+customResolver(updatedId, importer) {
+if (importer && importer.includes('apps/store-client')) {
+return path.resolve(**dirname, './src', updatedId)
+}
+return path.resolve(**dirname, '../../packages/ui-core/src', updatedId)
+}
+This code acts like a traffic cop checking passports:
+
+When a file inside store-client imports @/something, Vite evaluates importer.includes('apps/store-client') as true and points locally to the store app's source folder.
+
+When a file inside your UI warehouse package imports @/something, the cop detects it's an external module, bypasses the store app, and routes the search straight inside packages/ui-core/src/.
+
+We checked the physical hard drive on the fly using native Node file extensions (fs.existsSync) to append .ts or .tsx automatically so Vite never gets confused by bare extensions.
+
+What You Mastered Today:
+Workspace Interlinkage: You know how local apps safely point to local packages using "workspace:\*" symlinks without copying files.
+
+Task Orchestration: You configured Turborepo to run multiple development environments simultaneously with a single root command (pnpm dev).
+
+Vite Architecture Core: You understood that Vite is a text-compilation engine that intercepts import strings and transforms them into standard web assets, and you learned how to configure custom alias mapping boundaries.
+
+You successfully migrated a complex monolith into a highly scalable, isolated architectural configuration. Your foundation is perfectly clean, type-safe, and fully synchronized!
