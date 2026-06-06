@@ -1,0 +1,33 @@
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { RouterProvider } from "react-router-dom";
+import { router } from "./router";
+import { ClerkProvider } from "@clerk/react";
+
+// 🚀 Core Monolithic Global Modules migrated to the Shell Root Context
+import { useBootStrapAuth } from "@store/features/auth/useBootstrapAuth";
+import { ErrorModal } from "@store/components/ErrorModal";
+import { Toaster } from "@store/components/ui/sonner"; 
+
+import "@ecom/ui-core/src/index.css";
+
+// A wrapper component to safely execute hooks inside the React application tree
+function ShellRoot() {
+  useBootStrapAuth();
+
+  return (
+    <>
+      <RouterProvider router={router} />
+      <ErrorModal />
+      <Toaster />
+    </>
+  );
+}
+
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <ClerkProvider publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}>
+      <ShellRoot />
+    </ClerkProvider>
+  </StrictMode>
+);

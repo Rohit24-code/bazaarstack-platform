@@ -8,6 +8,14 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: [
+      // 🛒 1. Handle "@store/*" prefixes cleanly using your custom resolver logic
+      {
+        find: /^@store\/(.*)$/,
+        replacement: "$1",
+        customResolver(updatedId, importer) {
+          return path.resolve(__dirname, "./src", updatedId);
+        },
+      },
       {
         find: /^@\/(.*)$/,
         replacement: "$1",
@@ -29,7 +37,6 @@ export default defineConfig({
           if (fs.existsSync(`${baseUIPath}.ts`)) return `${baseUIPath}.ts`;
           if (fs.existsSync(`${baseUIPath}.jsx`)) return `${baseUIPath}.jsx`;
           if (fs.existsSync(`${baseUIPath}.js`)) return `${baseUIPath}.js`;
-
           return baseUIPath;
         },
       },

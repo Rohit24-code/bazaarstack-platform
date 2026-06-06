@@ -1,73 +1,50 @@
-import { ApiClient } from "..";
+import { ApiClient } from "../index";
+import type {
+  CustomerProduct,
+  CustomerProductDetailsResponse,
+  CustomerReviewPayload,
+  GetCustomerProductsParams,
+  ProductCategory,
+} from "../types/products";
 
-// 📋 1. Explicit Type Specifications for Customer Products
-export interface ProductCategory {
-  _id: string;
-  name: string;
-  slug: string;
+// Industry Best Practice: Decouple the engine using explicit parameter injection!
+export async function getCustomerCategories(api: ApiClient) {
+  return api.get<ProductCategory[]>("/customer/categories");
 }
 
-export interface CustomerProduct {
-  _id: string;
-  name: string;
-  description: string;
-  price: number;
-  brand: string;
-  color: string;
-  size: string;
-  images: string[];
-  category: string;
+export async function getCustomerProducts(
+  api: ApiClient,
+  params?: GetCustomerProductsParams,
+) {
+  const searchParams = new URLSearchParams();
+
+  if (params?.category) searchParams.set("category", params.category);
+  if (params?.brand) searchParams.set("brand", params.brand);
+  if (params?.color) searchParams.set("color", params.color);
+  if (params?.size) searchParams.set("size", params.size);
+  if (params?.sort) searchParams.set("sort", params.sort);
+
+  const queryString = searchParams.toString();
+  const url = queryString
+    ? `/customer/products?${queryString}`
+    : `/customer/products`;
+
+  return api.get<CustomerProduct[]>(url);
 }
 
-export interface CustomerProductDetailsResponse {
-  product: CustomerProduct;
-  relatedProducts: CustomerProduct[];
+export async function getCustomerProductDetails(
+  api: ApiClient,
+  productId: string,
+) {
+  return api.get<CustomerProductDetailsResponse>(
+    `/customer/products/${productId}`,
+  );
 }
 
-export interface GetCustomerProductsParams {
-  category?: string;
-  brand?: string;
-  color?: string;
-  size?: string;
-  sort?: string;
+export async function postReview(api: ApiClient, body: CustomerReviewPayload) {
+  return api.post<CustomerReviewPayload>("customer/review", body);
 }
 
-// ⚙️ 2. The Isolated Customer Product Domain Service
-export class CustomerProductService {
-  private client: ApiClient;
-
-  constructor(client: ApiClient) {
-    this.client = client;
-  }
-
-  /**
-   * 🛍️ READ: Fetch the categorical structure for navigational navigation arrays
-   */
-  public async getCustomerCategories(): Promise<ProductCategory[]> {
-    return this.client.get<ProductCategory[]>("/customer/categories");
-  }
-
-  /**
-   * 🛍️ READ: Query full product listings with dynamic matrix metrics
-   * 🚀 SYSTEM UPGRADE: We completely wipe out manual URLSearchParams strings!
-   * We pass the clean 'params' object straight into Axios, which builds the query safely under the hood.
-   */
-  public async getCustomerProducts(
-    params?: GetCustomerProductsParams,
-  ): Promise<CustomerProduct[]> {
-    return this.client.get<CustomerProduct[]>("/customer/products", {
-      params: params, // Axios handles the serialization natively!
-    });
-  }
-
-  /**
-   * 🛍️ READ: Retrieve comprehensive information for specific Product Detail Pages
-   */
-  public async getCustomerProductDetails(
-    productId: string,
-  ): Promise<CustomerProductDetailsResponse> {
-    return this.client.get<CustomerProductDetailsResponse>(
-      `/customer/products/${productId}`,
-    );
-  }
+export async function getReviews(api: ApiClient, id: string) {
+  return api.get<any>(`customer/review?id=${id}`);
 }
