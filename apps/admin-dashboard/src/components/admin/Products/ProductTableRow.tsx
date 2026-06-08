@@ -1,18 +1,18 @@
-import { TableCell, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Pencil } from "lucide-react"
-import { tableStyles } from "./constants"
-import { getCoverImage } from "@/features/admin/products/hooks/useProductForm"
-import type { Product } from "@/features/admin/products/types"
+import { TableCell, TableRow } from "@ecom/ui-core";
+import { Badge } from "@ecom/ui-core";
+import { Button } from "@ecom/ui-core";
+import { Pencil } from "lucide-react";
+import { tableStyles } from "./constants";
+import { getCoverImage } from "@/features/admin/products/hooks/useProductForm";
+import type { Product } from "@/features/admin/products/types";
 
 type ProductTableRowProps = {
-  product: Product
-  onEdit: (product: Product) => void
-}
+  product: Product;
+  onEdit: (product: Product) => void;
+};
 
 export function ProductTableRow({ product, onEdit }: ProductTableRowProps) {
-  const cover = getCoverImage(product.images)
+  const cover = getCoverImage(product.images);
 
   return (
     <TableRow>
@@ -50,5 +50,5 @@ export function ProductTableRow({ product, onEdit }: ProductTableRowProps) {
         </div>
       </TableCell>
     </TableRow>
-  )
+  );
 }

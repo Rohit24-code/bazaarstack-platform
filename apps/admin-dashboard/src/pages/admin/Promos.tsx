@@ -1,32 +1,35 @@
-import React from "react"
-import { promoStyles } from "./constants"
+import React from "react";
+import { promoStyles } from "./constants";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import PromoToolbar from "@/components/promos/PromoToolbar"
-import PromoTable from "@/components/promos/PromoTable"
-import PromoDialog from "@/components/promos/PromoDilog"
-import { useAdminPromoManager } from "@/features/admin/Promo/useAdminPromoManager"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@ecom/ui-core";
+import PromoToolbar from "@/components/promos/PromoToolbar";
+import PromoTable from "@/components/promos/PromoTable";
+import PromoDialog from "@/components/promos/PromoDilog";
+import { useAdminPromoManager } from "@/features/admin/Promo/useAdminPromoManager";
 
 function AdminPromos() {
-  useAdminPromoManager()
+  useAdminPromoManager();
   return (
     <div className={promoStyles.pageWrapClass}>
       <Card className={promoStyles.cardClass}>
         <CardHeader className={promoStyles.cardHeaderClass}>
           <CardTitle className={promoStyles.cardTitleClass}>Promos</CardTitle>
-          <PromoToolbar
-          />
+          <PromoToolbar />
         </CardHeader>
 
         <CardContent>
-          <PromoTable
-          />
+          <PromoTable />
         </CardContent>
       </Card>
 
       <PromoDialog />
     </div>
-  )
+  );
 }
 
-export default AdminPromos
+export default AdminPromos;

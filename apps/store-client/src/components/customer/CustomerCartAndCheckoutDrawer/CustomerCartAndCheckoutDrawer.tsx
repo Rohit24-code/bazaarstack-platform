@@ -4,19 +4,19 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
-} from "@/components/ui/drawer"
+} from "@ecom/ui-core";
 
-import { useEffect } from "react"
-import { useAuthStore } from "@/features/auth/store"
-import { useAuth, useUser } from "@clerk/react"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { formatPrice } from "@/lib/utils"
-import { useNavigate } from "react-router-dom"
-import { customerCartAndCheckoutDrawerStyles } from "../constants"
-import { useCustomerCartAndCheckoutStore } from "@/features/customer/cartAndCheckout/store"
-import CustomerCartItems from "./CustomerCartItems"
+import { useEffect } from "react";
+import { useAuthStore } from "@/features/auth/store";
+import { useAuth, useUser } from "@clerk/react";
+import { ScrollArea } from "@ecom/ui-core";
+import { Input } from "@ecom/ui-core";
+import { Button } from "@ecom/ui-core";
+import { formatPrice } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
+import { customerCartAndCheckoutDrawerStyles } from "../constants";
+import { useCustomerCartAndCheckoutStore } from "@/features/customer/cartAndCheckout/store";
+import CustomerCartItems from "./CustomerCartItems";
 
 function SummaryRow(props: { label: string; value: string | number }) {
   return (
@@ -24,14 +24,14 @@ function SummaryRow(props: { label: string; value: string | number }) {
       <span className="text-muted-foreground">{props.label}</span>
       <span>{props.value}</span>
     </div>
-  )
+  );
 }
 
 function CustomerCartAndCheckoutDrawer() {
-  const { isBootStrapped } = useAuthStore()
-  const { isLoaded, isSignedIn } = useAuth()
-  const { user } = useUser()
-  const navigate = useNavigate()
+  const { isBootStrapped } = useAuthStore();
+  const { isLoaded, isSignedIn } = useAuth();
+  const { user } = useUser();
+  const navigate = useNavigate();
   const {
     isOpen,
     setOpen,
@@ -51,28 +51,27 @@ function CustomerCartAndCheckoutDrawer() {
     startPointsCheckout,
     loading,
     cart,
-  } = useCustomerCartAndCheckoutStore((state) => state)
+  } = useCustomerCartAndCheckoutStore((state) => state);
 
   useEffect(() => {
-    if (!isOpen || !isLoaded || !isBootStrapped) return
+    if (!isOpen || !isLoaded || !isBootStrapped) return;
 
-    loadCart(Boolean(isSignedIn))
-
-  }, [isBootStrapped, isLoaded, isOpen, isSignedIn, loadCart])
+    loadCart(Boolean(isSignedIn));
+  }, [isBootStrapped, isLoaded, isOpen, isSignedIn, loadCart]);
 
   const selectedAddress =
-    addresses.find((item) => item._id === selectedAddressId) || null
+    addresses.find((item) => item._id === selectedAddressId) || null;
 
   const subTotal = cart.items.reduce(
     (sum, item) => sum + item.finalPrice * item.quantity,
-    0
-  )
+    0,
+  );
 
   const discountAmount = appliedPromo
     ? Math.round((subTotal * appliedPromo.percentage) / 100)
-    : 0
+    : 0;
 
-  const totalAmount = Math.max(subTotal - discountAmount, 0)
+  const totalAmount = Math.max(subTotal - discountAmount, 0);
 
   return (
     <Drawer open={isOpen} onOpenChange={setOpen}>
@@ -233,14 +232,14 @@ function CustomerCartAndCheckoutDrawer() {
                     >
                       <Button
                         onClick={() => {
-                          void setOpen(false)
+                          void setOpen(false);
                           void startRazorpayCheckout({
                             isSignedIn: Boolean(isSignedIn),
                             name: user?.fullName || "Customer",
                             email:
                               user?.primaryEmailAddress?.emailAddress || "",
                             onSuccess: () => navigate("/order-success"),
-                          })
+                          });
                         }}
                         type="button"
                         className={
@@ -263,7 +262,7 @@ function CustomerCartAndCheckoutDrawer() {
                           void startPointsCheckout({
                             isSignedIn: Boolean(isSignedIn),
                             onSuccess: () => navigate("/order-success"),
-                          })
+                          });
                         }}
                         disabled={
                           !(
@@ -305,7 +304,7 @@ function CustomerCartAndCheckoutDrawer() {
         </div>
       </DrawerContent>
     </Drawer>
-  )
+  );
 }
 
-export default CustomerCartAndCheckoutDrawer
+export default CustomerCartAndCheckoutDrawer;

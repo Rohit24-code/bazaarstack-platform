@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/react";
 import { Routes, Route } from "react-router-dom";
-import { injectAuthHeaderGetter } from "../../../admin-dashboard/src/lib/api";
-import AdminLayout from "../../../admin-dashboard/src/components/layout/AdminLayout";
-import AdminDashboardHome from "../../../admin-dashboard/src/pages/admin/Dashboard";
-import ProductsManagement from "../../../admin-dashboard/src/pages/admin/Products";
-import OrdersManagement from "../../../admin-dashboard/src/pages/admin/Orders";
-import AdminCoupons from "../../../admin-dashboard/src/pages/admin/Promos";
-import AdminSettings from "../../../admin-dashboard/src/pages/admin/Settings";
-import AdminProtectedLayout from "../../../admin-dashboard/src/components/auth/ProtectedLayout";
+import { injectAuthHeaderGetter } from "./lib/api";
+import AdminLayout from "./components/layout/AdminLayout";
+import AdminDashboardHome from "./pages/admin/Dashboard";
+import ProductsManagement from "./pages/admin/Products";
+import OrdersManagement from "./pages/admin/Orders";
+import AdminCoupons from "./pages/admin/Promos";
+import AdminSettings from "./pages/admin/Settings";
+import AdminProtectedLayout from "./components/auth/ProtectedLayout";
 
 export default function AdminRemote() {
   const { getToken, isLoaded, isSignedIn } = useAuth();
@@ -39,13 +39,9 @@ export default function AdminRemote() {
       <Route element={<AdminLayout />}>
         <Route element={<AdminProtectedLayout />}>
           <Route index element={<AdminDashboardHome />} />
-
           <Route path="products" element={<ProductsManagement />} />
-
           <Route path="orders" element={<OrdersManagement />} />
-
           <Route path="coupons" element={<AdminCoupons />} />
-
           <Route path="settings" element={<AdminSettings />} />
         </Route>
       </Route>

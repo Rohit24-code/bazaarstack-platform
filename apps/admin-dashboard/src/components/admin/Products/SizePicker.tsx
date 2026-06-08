@@ -1,11 +1,11 @@
-import { Button } from "@/components/ui/button"
-import { SIZE_OPTIONS } from "@/features/admin/products/constants"
-import { sizeStyles } from "./constants"
+import { Button } from "@ecom/ui-core";
+import { SIZE_OPTIONS } from "@/features/admin/products/constants";
+import { sizeStyles } from "./constants";
 
 type SizeSelectorProps = {
-  selectedSizes: string[]
-  onToggle: (size: string) => void
-}
+  selectedSizes: string[];
+  onToggle: (size: string) => void;
+};
 
 export function SizeSelector({ onToggle, selectedSizes }: SizeSelectorProps) {
   return (
@@ -15,7 +15,7 @@ export function SizeSelector({ onToggle, selectedSizes }: SizeSelectorProps) {
       </div>
       <div className={sizeStyles?.gridClass}>
         {SIZE_OPTIONS.map((sizeItem) => {
-          const active = selectedSizes.includes(sizeItem)
+          const active = selectedSizes.includes(sizeItem);
 
           return (
             <Button
@@ -27,9 +27,9 @@ export function SizeSelector({ onToggle, selectedSizes }: SizeSelectorProps) {
             >
               {sizeItem}
             </Button>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }

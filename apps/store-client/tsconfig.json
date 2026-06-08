@@ -20,11 +20,10 @@
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
 
+    /* Monorepo Path Mapping */
     "paths": {
-      "@/*": ["./src/*", "../store-client/src/*", "../admin-dashboard/src/*"],
-      "@store/*": ["../store-client/src/*"],
-      "@admin/*": ["../admin-dashboard/src/*"]
+      "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*", "vite.config.ts","src/vite-env.d.ts"]
+  "include": ["src/**/*", "vite.config.ts"]
 }

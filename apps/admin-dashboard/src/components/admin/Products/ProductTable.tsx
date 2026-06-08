@@ -1,20 +1,20 @@
-import { tableStyles } from "./constants"
-import { getCoverImage } from "@/features/admin/products/hooks/useProductForm"
-import { useProductStore } from "@/features/admin/products/store"
-import { DataTable, type ColumnDef } from "@/components/ui/DataTable"
-import type { Product } from "@/features/admin/products/types"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Pencil } from "lucide-react"
+import { tableStyles } from "./constants";
+import { getCoverImage } from "@/features/admin/products/hooks/useProductForm";
+import { useProductStore } from "@/features/admin/products/store";
+import { DataTable, type ColumnDef } from "@ecom/ui-core";
+import type { Product } from "@/features/admin/products/types";
+import { Badge } from "@ecom/ui-core";
+import { Button } from "@ecom/ui-core";
+import { Pencil } from "lucide-react";
 
 const useProductColumns = (): ColumnDef<Product>[] => {
-  const { openEditDialog: onEdit } = useProductStore()
+  const { openEditDialog: onEdit } = useProductStore();
 
   return [
     {
       header: "Image",
       render: (product) => {
-        const cover = getCoverImage(product.images)
+        const cover = getCoverImage(product.images);
         return (
           <div className={tableStyles.imageBoxClass}>
             {cover ? (
@@ -25,7 +25,7 @@ const useProductColumns = (): ColumnDef<Product>[] => {
               />
             ) : null}
           </div>
-        )
+        );
       },
     },
     {
@@ -70,13 +70,14 @@ const useProductColumns = (): ColumnDef<Product>[] => {
         </div>
       ),
     },
-  ]
-}
+  ];
+};
 
 export function ProductTable() {
-  const { products, loading, page, limit, totalCount, setPage } = useProductStore()
-  const columns = useProductColumns()
-  const totalPages = Math.ceil(totalCount / limit)
+  const { products, loading, page, limit, totalCount, setPage } =
+    useProductStore();
+  const columns = useProductColumns();
+  const totalPages = Math.ceil(totalCount / limit);
 
   return (
     <div className="space-y-4">
@@ -91,7 +92,8 @@ export function ProductTable() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-2">
           <div className="text-sm text-muted-foreground">
-            Showing {(page - 1) * limit + 1} to {Math.min(page * limit, totalCount)} of {totalCount} products
+            Showing {(page - 1) * limit + 1} to{" "}
+            {Math.min(page * limit, totalCount)} of {totalCount} products
           </div>
           <div className="flex items-center space-x-2">
             <Button
@@ -117,5 +119,5 @@ export function ProductTable() {
         </div>
       )}
     </div>
-  )
+  );
 }

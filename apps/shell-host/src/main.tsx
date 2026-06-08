@@ -7,7 +7,7 @@ import { ClerkProvider } from "@clerk/react";
 // 🚀 Core Monolithic Global Modules migrated to the Shell Root Context
 import { useBootStrapAuth } from "@store/features/auth/useBootstrapAuth";
 import { ErrorModal } from "@store/components/ErrorModal";
-import { Toaster } from "@store/components/ui/sonner"; 
+import { Toaster } from "@ecom/ui-core";
 
 import "@ecom/ui-core/src/index.css";
 
@@ -29,5 +29,5 @@ createRoot(document.getElementById("root")!).render(
     <ClerkProvider publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}>
       <ShellRoot />
     </ClerkProvider>
-  </StrictMode>
+  </StrictMode>,
 );

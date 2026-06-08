@@ -1,15 +1,15 @@
-import { useAuthStore } from "@/features/auth/store"
-import { useAuth } from "@clerk/react"
-import { Navigate, Outlet } from "react-router-dom"
-import Loader from "../common/Loader"
+import { useAuthStore } from "@/features/auth/store.ts";
+import { useAuth } from "@clerk/react";
+import { Navigate, Outlet } from "react-router-dom";
+import Loader from "../common/Loader";
 
 function ProtectedLayout() {
-  const { isLoaded, isSignedIn } = useAuth()
-  const { isBootStrapped, status } = useAuthStore()
-  if (!isLoaded) return null
+  const { isLoaded, isSignedIn } = useAuth();
+  const { isBootStrapped, status } = useAuthStore();
+  if (!isLoaded) return null;
 
   if (!isLoaded || (isSignedIn && (!isBootStrapped || status === "loading"))) {
-    return <Loader />
+    return <Loader />;
   }
 
   if (!isSignedIn) {
@@ -19,10 +19,10 @@ function ProtectedLayout() {
         replace
         state={{ from: `${location.pathname}${location.search}` }}
       />
-    )
+    );
   }
 
-  return <Outlet />
+  return <Outlet />;
 }
 
-export default ProtectedLayout
+export default ProtectedLayout;

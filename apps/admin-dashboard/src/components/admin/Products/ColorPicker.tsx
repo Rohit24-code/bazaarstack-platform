@@ -1,17 +1,17 @@
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { X } from "lucide-react"
-import { useState } from "react"
-import { colorStyles } from "./constants"
+import { Button } from "@ecom/ui-core";
+import { Input } from "@ecom/ui-core";
+import { X } from "lucide-react";
+import { useState } from "react";
+import { colorStyles } from "./constants";
 
 type ColorPickerProps = {
-  colors: string[]
-  onAdd: (color: string) => void
-  onRemove: (color: string) => void
-}
+  colors: string[];
+  onAdd: (color: string) => void;
+  onRemove: (color: string) => void;
+};
 
 export function ColorPicker({ colors, onAdd, onRemove }: ColorPickerProps) {
-  const [selectedColor, setSelectedColor] = useState("#111111")
+  const [selectedColor, setSelectedColor] = useState("#111111");
 
   return (
     <div className={colorStyles?.wrapperClass}>
@@ -53,5 +53,5 @@ export function ColorPicker({ colors, onAdd, onRemove }: ColorPickerProps) {
         ))}
       </div>
     </div>
-  )
+  );
 }

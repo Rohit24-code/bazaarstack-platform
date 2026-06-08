@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "dev:remote": "vite preview"
   },
   "dependencies": {
     "@clerk/react": "^6.7.2",
@@ -22,7 +23,7 @@
     "autoprefixer": "^10.5.0",
     "postcss": "^8.5.15",
     "tailwindcss": "^4.3.0",
-    "typescript": "^5.7.2",
-    "vite": "^6.0.5"
+    "typescript": "~5.7.2",
+    "vite": "^7.3.1"
   }
 }

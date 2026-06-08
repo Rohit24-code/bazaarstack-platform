@@ -1,61 +1,61 @@
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Badge } from "@ecom/ui-core";
+import { Button } from "@ecom/ui-core";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { DataTable, type ColumnDef } from "@/components/ui/DataTable"
-import { useCustomerOrdersStore } from "@/features/customer/orders/store"
+} from "@ecom/ui-core";
+import { DataTable, type ColumnDef } from "@ecom/ui-core";
+import { useCustomerOrdersStore } from "@/features/customer/orders/store";
 import type {
   CustomerOrder,
   CustomerOrderStatus,
   CustomerPaymentStatus,
-} from "@/features/customer/orders/types"
-import { formatPrice } from "@/lib/utils"
-import { ShoppingBasket } from "lucide-react"
-import { customerOrderDialogStyles } from "../constants"
+} from "@/features/customer/orders/types";
+import { formatPrice } from "@/lib/utils";
+import { ShoppingBasket } from "lucide-react";
+import { customerOrderDialogStyles } from "../constants";
 
 function CustomerPaymentStatusBadge(props: { status: CustomerPaymentStatus }) {
-  const { status } = props
+  const { status } = props;
   const className =
     status === "paid"
       ? customerOrderDialogStyles.successBadgeClass
       : status === "failed"
         ? customerOrderDialogStyles.dangerBadgeClass
-        : customerOrderDialogStyles.neutralBadgeClass
+        : customerOrderDialogStyles.neutralBadgeClass;
 
-  return <Badge className={className}>{status}</Badge>
+  return <Badge className={className}>{status}</Badge>;
 }
 
 function CustomerOrderStatusBadge(props: { status: CustomerOrderStatus }) {
-  const { status } = props
+  const { status } = props;
   const className =
     status === "delivered"
       ? customerOrderDialogStyles.successBadgeClass
       : status === "returned"
         ? customerOrderDialogStyles.dangerBadgeClass
-        : customerOrderDialogStyles.neutralBadgeClass
+        : customerOrderDialogStyles.neutralBadgeClass;
 
-  return <Badge className={className}>{status}</Badge>
+  return <Badge className={className}>{status}</Badge>;
 }
 
 function formatDate(value?: string | null) {
-  return value ? new Date(value).toLocaleDateString() : "-"
+  return value ? new Date(value).toLocaleDateString() : "-";
 }
 
 function canReturnOrder(order: CustomerOrder) {
-  if (order.orderStatus !== "delivered" || !order.deliveredAt) return false
+  if (order.orderStatus !== "delivered" || !order.deliveredAt) return false;
 
-  const diff = Date.now() - new Date(order.deliveredAt).getTime()
+  const diff = Date.now() - new Date(order.deliveredAt).getTime();
 
-  return diff <= 7 * 24 * 60 * 60 * 1000
+  return diff <= 7 * 24 * 60 * 60 * 1000;
 }
 
 function CustomerOrdersDialog() {
   const { isOpen, closeOrders, loading, items, returnOrder, loadOrders } =
-    useCustomerOrdersStore((state) => state)
+    useCustomerOrdersStore((state) => state);
 
   const columns: ColumnDef<CustomerOrder>[] = [
     {
@@ -100,7 +100,7 @@ function CustomerOrdersDialog() {
           </span>
         ),
     },
-  ]
+  ];
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && closeOrders()}>
@@ -135,7 +135,7 @@ function CustomerOrdersDialog() {
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
-export default CustomerOrdersDialog
+export default CustomerOrdersDialog;

@@ -1,18 +1,18 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "@ecom/ui-core";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+} from "@ecom/ui-core";
+import { Input } from "@ecom/ui-core";
+import { Label } from "@ecom/ui-core";
 
-import { useCustomerProfileStore } from "@/features/customer/profile/store"
-import { useUser } from "@clerk/react"
-import { Pencil, Plus, Trash2 } from "lucide-react"
-import { customerProfileStyles } from "../constants"
-import { useCustomerCartAndCheckoutStore } from "@/features/customer/cartAndCheckout/store"
+import { useCustomerProfileStore } from "@/features/customer/profile/store";
+import { useUser } from "@clerk/react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
+import { customerProfileStyles } from "../constants";
+import { useCustomerCartAndCheckoutStore } from "@/features/customer/cartAndCheckout/store";
 
 function CustomerProfileDialog() {
   const {
@@ -27,13 +27,13 @@ function CustomerProfileDialog() {
     removeAddress,
     items,
     form,
-  } = useCustomerProfileStore()
+  } = useCustomerProfileStore();
 
-  const { points } = useCustomerCartAndCheckoutStore((state) => state)
+  const { points } = useCustomerCartAndCheckoutStore((state) => state);
 
-  const { user } = useUser()
+  const { user } = useUser();
 
-  const showForm = mode !== "none"
+  const showForm = mode !== "none";
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && closeProfile()}>
@@ -225,7 +225,7 @@ function CustomerProfileDialog() {
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
-export default CustomerProfileDialog
+export default CustomerProfileDialog;

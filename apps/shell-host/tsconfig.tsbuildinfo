@@ -1,1 +1,1 @@
-{"root":["./src/main.tsx","./src/router.tsx","./src/remotes/AdminRemote.tsx","./src/remotes/StorefrontRemote.tsx","./vite.config.ts"],"errors":true,"version":"5.9.3"}
+{"root":["./src/main.tsx","./src/remotes.d.ts","./src/router.tsx","./vite.config.ts"],"version":"5.7.3"}

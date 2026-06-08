@@ -2,36 +2,30 @@ import { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 
 // 🐚 Layouts can be imported synchronously if they are always needed immediately
-import CustomerLayout from "../../../store-client/src/components/layout/CustomerLayout";
-import ProtectedLayout from "../../../store-client/src/components/auth/ProtectedLayout";
+import CustomerLayout from "./components/layout/CustomerLayout";
+import ProtectedLayout from "./components/auth/ProtectedLayout";
 
 const SignInPage = lazy(() =>
-  import("../../../store-client/src/pages/auth/SignInPage").then((m) => ({
+  import("./pages/auth/SignInPage").then((m) => ({
     default: m.SignInPage,
   })),
 );
 const SignUpPage = lazy(() =>
-  import("../../../store-client/src/pages/auth/SignUpPage").then((m) => ({
+  import("./pages/auth/SignUpPage").then((m) => ({
     default: m.SignUpPage,
   })),
 );
 
 // 🚀 GRANULAR CODE SPLITTING: Split each page into its own micro-chunk on the fly!
-const StoreHome = lazy(
-  () => import("../../../store-client/src/pages/customer/Home"),
-);
-const Collections = lazy(
-  () => import("../../../store-client/src/pages/customer/Collections"),
-);
+const StoreHome = lazy(() => import("./pages/customer/Home"));
+const Collections = lazy(() => import("./pages/customer/Collections"));
 const CollectionsDetails = lazy(
-  () => import("../../../store-client/src/pages/customer/CollectionsDetails"),
+  () => import("./pages/customer/CollectionsDetails"),
 );
 const CustomerOrderSuccessPage = lazy(
-  () => import("../../../store-client/src/pages/customer/OrderSuccess"),
+  () => import("./pages/customer/OrderSuccess"),
 );
-const CustomerProfile = lazy(
-  () => import("../../../store-client/src/pages/customer/Profile"),
-);
+const CustomerProfile = lazy(() => import("./pages/customer/Profile"));
 
 export default function StorefrontRemote() {
   return (
@@ -42,10 +36,9 @@ export default function StorefrontRemote() {
       }
     >
       <Routes>
-       
         <Route element={<CustomerLayout />}>
-         <Route path="sign-in/*" element={<SignInPage />} />
-        <Route path="sign-up/*" element={<SignUpPage />} />
+          <Route path="sign-in/*" element={<SignInPage />} />
+          <Route path="sign-up/*" element={<SignUpPage />} />
           <Route index element={<StoreHome />} />
           <Route path="collections" element={<Collections />} />
           <Route path="collection/:id" element={<CollectionsDetails />} />

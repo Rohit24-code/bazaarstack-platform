@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "dev:remote": "vite preview"
   },
   "dependencies": {
     "@clerk/react": "^6.6.0",
@@ -28,6 +29,7 @@
     "radix-ui": "^1.4.3",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-hook-form": "^7.77.0",
     "react-router-dom": "^7.15.0",
     "shadcn": "^4.7.0",
     "sonner": "^2.0.7",
@@ -49,7 +51,7 @@
     "globals": "^16.5.0",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
-    "typescript": "~5.9.3",
+    "typescript": "~5.7.2",
     "typescript-eslint": "^8.57.1",
     "vite": "^7.3.1",
     "vite-plugin-tsconfig-paths": "^1.4.1"

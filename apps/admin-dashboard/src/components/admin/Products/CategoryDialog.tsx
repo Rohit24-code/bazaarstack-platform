@@ -1,67 +1,67 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "@ecom/ui-core";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
+} from "@ecom/ui-core";
+import { Input } from "@ecom/ui-core";
+import { Separator } from "@ecom/ui-core";
 import {
   createAdminCategory,
   updateAdminCategory,
-} from "@/features/admin/products/api"
-import type { Category } from "@/features/admin/products/types"
-import { Pencil, Tag } from "lucide-react"
-import { use, useState } from "react"
-import { categoryStyles } from "./constants"
-import { useProductStore } from "@/features/admin/products/store"
+} from "@/features/admin/products/api";
+import type { Category } from "@/features/admin/products/types";
+import { Pencil, Tag } from "lucide-react";
+import { use, useState } from "react";
+import { categoryStyles } from "./constants";
+import { useProductStore } from "@/features/admin/products/store";
 
 export function CategoryDialog() {
-  const [name, setName] = useState("")
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null)
-  const [saving, setSaving] = useState(false)
+  const [name, setName] = useState("");
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const {
     categoryDialogOpen: open,
     setCategoryDialogOpen: onOpenChange,
     refreshAll,
-  } = useProductStore()
+  } = useProductStore();
 
-  const { categories } = useProductStore()
+  const { categories } = useProductStore();
 
   async function handleSave() {
-    if (!name.trim()) return
+    if (!name.trim()) return;
 
     try {
-      setSaving(true)
+      setSaving(true);
 
       if (editingCategory) {
-        await updateAdminCategory(editingCategory._id, { name: name.trim() })
+        await updateAdminCategory(editingCategory._id, { name: name.trim() });
       } else {
-        await createAdminCategory({ name: name.trim() })
+        await createAdminCategory({ name: name.trim() });
       }
 
-      setName("")
-      setEditingCategory(null)
-      await refreshAll()
+      setName("");
+      setEditingCategory(null);
+      await refreshAll();
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
   }
 
   function handleEdit(getCurrentCategory: Category) {
-    setEditingCategory(getCurrentCategory)
-    setName(getCurrentCategory.name)
+    setEditingCategory(getCurrentCategory);
+    setName(getCurrentCategory.name);
   }
 
   function handleToggle(nextOpen: boolean) {
     if (!nextOpen) {
-      setName("")
-      setEditingCategory(null)
+      setName("");
+      setEditingCategory(null);
     }
 
-    onOpenChange(nextOpen)
+    onOpenChange(nextOpen);
   }
 
   return (
@@ -109,5 +109,5 @@ export function CategoryDialog() {
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

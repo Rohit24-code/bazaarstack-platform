@@ -1,14 +1,14 @@
 import Loader from "@/components/common/Loader"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@ecom/ui-core"
+import { Card, CardContent, CardHeader, CardTitle } from "@ecom/ui-core"
 import {
   SelectTrigger,
   SelectValue,
   Select,
   SelectContent,
   SelectItem,
-} from "@/components/ui/select"
-import { DataTable, type ColumnDef } from "@/components/ui/DataTable"
+} from "@ecom/ui-core"
+import { DataTable, type ColumnDef } from "@ecom/ui-core"
 import { useAdminOrdersStore } from "@/features/admin/orders/store"
 import type {
   AdminOrder,

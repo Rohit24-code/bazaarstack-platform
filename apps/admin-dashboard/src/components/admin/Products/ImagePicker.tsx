@@ -1,18 +1,18 @@
-import { Button } from "@/components/ui/button"
-import type { ProductImage } from "@/features/admin/products/types"
-import { ImagePlus, Star, X } from "lucide-react"
-import { useEffect, useMemo } from "react"
-import { imageStyles } from "./constants"
+import { Button } from "@ecom/ui-core";
+import type { ProductImage } from "@/features/admin/products/types";
+import { ImagePlus, Star, X } from "lucide-react";
+import { useEffect, useMemo } from "react";
+import { imageStyles } from "./constants";
 
 type ImagePickerProps = {
-  existingImages: ProductImage[]
-  newFiles: File[]
-  coverImagePublicId: string
-  onFilesAdd: (files: FileList | null) => void
-  onExistingRemove: (publicId: string) => void
-  onCoverImageChange: (publicId: string) => void
-  error?: string
-}
+  existingImages: ProductImage[];
+  newFiles: File[];
+  coverImagePublicId: string;
+  onFilesAdd: (files: FileList | null) => void;
+  onExistingRemove: (publicId: string) => void;
+  onCoverImageChange: (publicId: string) => void;
+  error?: string;
+};
 
 export function ImagePicker({
   existingImages,
@@ -25,14 +25,14 @@ export function ImagePicker({
 }: ImagePickerProps) {
   const previewUrls = useMemo(
     () => newFiles.map((file) => ({ file, url: URL.createObjectURL(file) })),
-    [newFiles]
-  )
+    [newFiles],
+  );
 
   useEffect(() => {
     return () => {
-      previewUrls.forEach((item) => URL.revokeObjectURL(item.url))
-    }
-  }, [previewUrls])
+      previewUrls.forEach((item) => URL.revokeObjectURL(item.url));
+    };
+  }, [previewUrls]);
 
   return (
     <div className={imageStyles.wrapperClass}>
@@ -64,7 +64,7 @@ export function ImagePicker({
 
           <div className={imageStyles.gridClass}>
             {existingImages.map((image) => {
-              const isCover = coverImagePublicId === image.publicId
+              const isCover = coverImagePublicId === image.publicId;
 
               return (
                 <div
@@ -98,7 +98,7 @@ export function ImagePicker({
                     </Button>
                   </div>
                 </div>
-              )
+              );
             })}
           </div>
         </div>
@@ -127,5 +127,5 @@ export function ImagePicker({
         </div>
       ) : null}
     </div>
-  )
+  );
 }

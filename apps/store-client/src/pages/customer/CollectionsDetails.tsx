@@ -1,21 +1,21 @@
-import Loader from "@/components/common/Loader"
-import { Button } from "@/components/ui/button"
-import { useAuthStore } from "@/features/auth/store"
-import { useCustomerProductDetailsStore } from "@/features/customer/products/useCustomerDetails"
-import { useCustomerWishlistStore } from "@/features/customer/wishlist/store"
-import { useAuth } from "@clerk/react"
-import { ArrowLeft } from "lucide-react"
-import React, { useEffect } from "react"
-import { Link, useParams } from "react-router-dom"
-import { collectionDetailsStyles } from "./constant"
-import CustomerProductDetailsSummary from "@/components/customer/Products/details/CustomerProductDetailsSummary"
-import CustomerProductDetailsGallery from "@/components/customer/Products/details/CustomerProductDetailsGallery"
-import CustomerProductRelatedCard from "@/components/customer/Products/details/CustomerProductRelatedCard"
+import Loader from "@/components/common/Loader";
+import { Button } from "@ecom/ui-core";
+import { useAuthStore } from "@/features/auth/store";
+import { useCustomerProductDetailsStore } from "@/features/customer/products/useCustomerDetails";
+import { useCustomerWishlistStore } from "@/features/customer/wishlist/store";
+import { useAuth } from "@clerk/react";
+import { ArrowLeft } from "lucide-react";
+import React, { useEffect } from "react";
+import { Link, useParams } from "react-router-dom";
+import { collectionDetailsStyles } from "./constant";
+import CustomerProductDetailsSummary from "@/components/customer/Products/details/CustomerProductDetailsSummary";
+import CustomerProductDetailsGallery from "@/components/customer/Products/details/CustomerProductDetailsGallery";
+import CustomerProductRelatedCard from "@/components/customer/Products/details/CustomerProductRelatedCard";
 
 function CollectionDetails() {
-  const { id = "" } = useParams()
-  const { isLoaded, isSignedIn } = useAuth()
-  const { isBootStrapped } = useAuthStore()
+  const { id = "" } = useParams();
+  const { isLoaded, isSignedIn } = useAuth();
+  const { isBootStrapped } = useAuthStore();
 
   const {
     loadProduct,
@@ -29,25 +29,25 @@ function CollectionDetails() {
     setSelectedSize,
     toggleWishlist,
     addToCart,
-  } = useCustomerProductDetailsStore((state) => state)
+  } = useCustomerProductDetailsStore((state) => state);
 
-  const wishlistItems = useCustomerWishlistStore((state) => state.items)
+  const wishlistItems = useCustomerWishlistStore((state) => state.items);
 
-  const product = data?.product ?? null
-  const relatedProducts = data?.relatedProducts ?? []
+  const product = data?.product ?? null;
+  const relatedProducts = data?.relatedProducts ?? [];
   const isWishlistActive = !!product
     ? wishlistItems.some((item) => item.productId === product._id)
-    : false
+    : false;
 
   useEffect(() => {
-    void loadProduct(id)
+    void loadProduct(id);
 
     return () => {
-      clear()
-    }
-  }, [clear, id, loadProduct])
+      clear();
+    };
+  }, [clear, id, loadProduct]);
 
-  if (!product) return <Loader />
+  if (!product) return <Loader />;
 
   return (
     <div className={collectionDetailsStyles.pageWrapClass}>
@@ -93,13 +93,14 @@ function CollectionDetails() {
                 isLoaded,
                 isBootStrapped,
                 Boolean(isSignedIn),
-                isWishlistActive
+                isWishlistActive,
               )
             }
             isWishlistActive={isWishlistActive}
-            onAddToCart={() =>
-              addToCart(isLoaded, isBootStrapped, Boolean(isSignedIn))
-            }
+            onAddToCart={() => {
+              console.log(" on add to cart");
+              return addToCart(isLoaded, isBootStrapped, Boolean(isSignedIn));
+            }}
           />
         </div>
 
@@ -123,7 +124,7 @@ function CollectionDetails() {
         ) : null}
       </div>
     </div>
-  )
+  );
 }
 
-export default CollectionDetails
+export default CollectionDetails;

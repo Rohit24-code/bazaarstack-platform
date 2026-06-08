@@ -1,24 +1,24 @@
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent } from "@ecom/ui-core";
 import {
   extractSalePrice,
   getCoverImage,
-} from "@/features/customer/products/productListShare"
+} from "@/features/customer/products/productListShare";
 
-import type { CustomerProduct } from "@/features/customer/products/types"
-import { formatPrice } from "@/lib/utils"
-import { Link } from "react-router-dom"
-import { customerRelatedProductCardStyles } from "../../constants"
+import type { CustomerProduct } from "@/features/customer/products/types";
+import { formatPrice } from "@/lib/utils";
+import { Link } from "react-router-dom";
+import { customerRelatedProductCardStyles } from "../../constants";
 
 type CustomerProductRelatedCardProps = {
-  product: CustomerProduct
-}
+  product: CustomerProduct;
+};
 
 function CustomerProductRelatedCard({
   product,
 }: CustomerProductRelatedCardProps) {
-  const coverImage = getCoverImage(product)
-  const salePrice = extractSalePrice(product)
-  const hasSale = product.salePercentage > 0
+  const coverImage = getCoverImage(product);
+  const salePrice = extractSalePrice(product);
+  const hasSale = product.salePercentage > 0;
 
   return (
     <Card className={customerRelatedProductCardStyles.cardClass}>
@@ -63,7 +63,7 @@ function CustomerProductRelatedCard({
         </CardContent>
       </Link>
     </Card>
-  )
+  );
 }
 
-export default CustomerProductRelatedCard
+export default CustomerProductRelatedCard;

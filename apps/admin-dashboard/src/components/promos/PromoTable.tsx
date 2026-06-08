@@ -1,11 +1,11 @@
 import { promoTableStyles } from "@/pages/admin/constants"
 import React, { useState } from "react"
 import { formatDateTime } from "@/lib/functions"
-import { Button } from "../ui/button"
+import { Button } from "@ecom/ui-core"
 import { Pencil, Trash2 } from "lucide-react"
 import { useAdminPromoStore } from "@/features/admin/Promo/useAdminPromStore"
 import type { Promo } from "@/features/admin/Promo/types"
-import { DataTable, type ColumnDef } from "../ui/DataTable"
+import { DataTable, type ColumnDef } from "@ecom/ui-core"
 import {
   Dialog,
   DialogContent,
@@ -13,7 +13,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "../ui/dialog"
+} from "@ecom/ui-core"
 
 const usePromoColumns = (
   onDeleteClick: (id: string) => void

@@ -1,26 +1,26 @@
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@ecom/ui-core";
+import { Button } from "@ecom/ui-core";
+import { Card, CardContent } from "@ecom/ui-core";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@ecom/ui-core";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet"
-import { productCollectionStyles } from "./constant"
-import { SlidersHorizontal } from "lucide-react"
-import { useCustomerProductList } from "@/features/customer/products/useCustomerProductList"
-import type { ProductSort } from "@/features/customer/products/types"
-import CustomerProductCard from "@/components/customer/Products/CustomerProductCard"
-import CustomerFiltersPanel from "@/components/customer/Products/CustomerFilterPanel"
+} from "@ecom/ui-core";
+import { productCollectionStyles } from "./constant";
+import { SlidersHorizontal } from "lucide-react";
+import { useCustomerProductList } from "@/features/customer/products/useCustomerProductList";
+import type { ProductSort } from "@/features/customer/products/types";
+import CustomerProductCard from "@/components/customer/Products/CustomerProductCard";
+import CustomerFiltersPanel from "@/components/customer/Products/CustomerFilterPanel";
 
 const Collections = () => {
   const {
@@ -35,7 +35,7 @@ const Collections = () => {
     toggleFacet,
     clearFilters,
     activeFilterBadges,
-  } = useCustomerProductList()
+  } = useCustomerProductList();
 
   return (
     <div className={productCollectionStyles.pageWrap}>
@@ -164,7 +164,7 @@ const Collections = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Collections
+export default Collections;

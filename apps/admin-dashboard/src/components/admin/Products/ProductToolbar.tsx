@@ -1,8 +1,8 @@
-import { styles } from "./constants"
-import { Input } from "@/components/ui/input"
-import { Search, Plus } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { useProductStore } from "@/features/admin/products/store"
+import { styles } from "./constants";
+import { Input } from "@ecom/ui-core";
+import { Search, Plus } from "lucide-react";
+import { Button } from "@ecom/ui-core";
+import { useProductStore } from "@/features/admin/products/store";
 
 export function ProductToolbar() {
   const {
@@ -10,7 +10,7 @@ export function ProductToolbar() {
     setCategoryDialogOpen: onOpenChange,
     openCreateDialog: onAddProduct,
     setSearch,
-  } = useProductStore()
+  } = useProductStore();
 
   return (
     <div className={styles.wrapperClass}>
@@ -34,5 +34,5 @@ export function ProductToolbar() {
         </Button>
       </div>
     </div>
-  )
+  );
 }

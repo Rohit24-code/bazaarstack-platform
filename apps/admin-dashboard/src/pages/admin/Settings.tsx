@@ -1,11 +1,16 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { ImagePlus } from "lucide-react"
-import React from "react"
-import { settingStyles } from "./constants"
-import { useAdminSettings } from "@/features/admin/Settings/hooks/useAdminSettings"
-import AdminSettingsBannersTable from "@/components/admin/Settings/AdminSettingsBannersTable"
+import { Button } from "@ecom/ui-core";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@ecom/ui-core";
+import { Input } from "@ecom/ui-core";
+import { ImagePlus } from "lucide-react";
+import React from "react";
+import { settingStyles } from "./constants";
+import { useAdminSettings } from "@/features/admin/Settings/hooks/useAdminSettings";
+import AdminSettingsBannersTable from "@/components/admin/Settings/AdminSettingsBannersTable";
 
 function AdminSettings() {
   const {
@@ -18,7 +23,7 @@ function AdminSettings() {
     refreshBanners,
     handleUpload,
     uploading,
-  } = useAdminSettings()
+  } = useAdminSettings();
 
   return (
     <div className={settingStyles.pageWrapClass}>
@@ -92,7 +97,7 @@ function AdminSettings() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default AdminSettings
+export default AdminSettings;

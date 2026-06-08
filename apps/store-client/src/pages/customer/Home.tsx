@@ -1,26 +1,26 @@
-import Loader from "@/components/common/Loader"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
-import { useCustomerHomeStore } from "@/features/customer/home/store"
-import { formatPrice } from "@/lib/utils"
-import { ArrowRight, Grid2X2, TicketPercent } from "lucide-react"
-import { useEffect } from "react"
-import { Link } from "react-router-dom"
-import { homeStyles } from "./constant"
+import Loader from "@/components/common/Loader";
+import { Badge } from "@ecom/ui-core";
+import { Card, CardContent } from "@ecom/ui-core";
+import { useCustomerHomeStore } from "@/features/customer/home/store";
+import { formatPrice } from "@/lib/utils";
+import { ArrowRight, Grid2X2, TicketPercent } from "lucide-react";
+import { useEffect } from "react";
+import { Link } from "react-router-dom";
+import { homeStyles } from "./constant";
 
 function StoreHome() {
-  const { data, loading, loadHome } = useCustomerHomeStore((state) => state)
+  const { data, loading, loadHome } = useCustomerHomeStore((state) => state);
 
   useEffect(() => {
-    loadHome()
-  }, [loadHome])
+    loadHome();
+  }, [loadHome]);
 
   if (loading) {
-    return <Loader />
+    return <Loader />;
   }
 
-  const mainBanner = data.banners[0] || null
-  const sideBanners = data.banners.slice(1, 3)
+  const mainBanner = data.banners[0] || null;
+  const sideBanners = data.banners.slice(1, 3);
 
   return (
     <div className={homeStyles.pageWrapClass}>
@@ -241,7 +241,7 @@ function StoreHome() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default StoreHome
+export default StoreHome;

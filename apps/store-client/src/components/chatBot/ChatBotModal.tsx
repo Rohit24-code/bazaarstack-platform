@@ -1,11 +1,11 @@
-import React, { useEffect, useRef } from "react"
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
-import { styles } from "./chatBotStyles"
-import useChatBot from "@/features/chatBot/useChatBot"
+import React, { useEffect, useRef } from "react";
+import { Dialog, DialogContent, DialogTitle } from "@ecom/ui-core";
+import { styles } from "./chatBotStyles";
+import useChatBot from "@/features/chatBot/useChatBot";
 
 interface ChatBotModalProps {
-  isOpen: boolean
-  onClose: () => void
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 const ChatBotModal: React.FC<ChatBotModalProps> = ({ isOpen, onClose }) => {
@@ -19,26 +19,26 @@ const ChatBotModal: React.FC<ChatBotModalProps> = ({ isOpen, onClose }) => {
     searchTerm,
     askGeminiFunc,
     handleClearHistory,
-  } = useChatBot()
+  } = useChatBot();
 
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [history, loading])
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [history, loading]);
 
   const handleSend = () => {
     if (question.trim() && !loading) {
-      askGeminiFunc(question)
+      askGeminiFunc(question);
     }
-  }
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
+      e.preventDefault();
+      handleSend();
     }
-  }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -60,7 +60,7 @@ const ChatBotModal: React.FC<ChatBotModalProps> = ({ isOpen, onClose }) => {
               .filter(
                 (msg) =>
                   msg.role === "user" &&
-                  msg.text.toLowerCase().includes(searchTerm.toLowerCase())
+                  msg.text.toLowerCase().includes(searchTerm.toLowerCase()),
               )
               .map((msg, idx) => (
                 <button
@@ -154,7 +154,7 @@ const ChatBotModal: React.FC<ChatBotModalProps> = ({ isOpen, onClose }) => {
         </div>
       </DialogContent>
     </Dialog>
-  )
-}
+  );
+};
 
-export default ChatBotModal
+export default ChatBotModal;

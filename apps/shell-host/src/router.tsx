@@ -1,9 +1,11 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
-// 🚀 Dynamic Bundle Division: Code split your app frameworks at the root boundary!
-const StorefrontRemote = lazy(() => import("./remotes/StorefrontRemote"));
-const AdminRemote = lazy(() => import("./remotes/AdminRemote"));
+// 🌐 TRUE RUNTIME FEDERATION IMPORTS: Pulled purely across network origins!
+// @ts-ignore
+const StorefrontRemote = lazy(() => import("storefront/StorefrontApp"));
+// @ts-ignore
+const AdminRemote = lazy(() => import("admin_dashboard/AdminApp"));
 
 export const router = createBrowserRouter([
   {

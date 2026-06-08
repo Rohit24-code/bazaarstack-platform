@@ -2,44 +2,47 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
-import fs from "fs"; // 🚀 Native Node file system reader to check if files exist
+import federation from "@originjs/vite-plugin-federation";
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  root: __dirname,
+  base: "http://localhost:5175/",
+  plugins: [
+    react(),
+    tailwindcss(),
+    federation({
+      name: "storefront",
+      filename: "remoteEntry.js",
+      exposes: {
+        "./StorefrontApp": "./src/StorefrontRemote.tsx",
+        /* 🚀 THE EXPOSED KEYS: These subpaths must align perfectly with your imports */
+        "./features/auth/useBootstrapAuth":
+          "./src/features/auth/useBootstrapAuth.ts",
+        "./components/ErrorModal": "./src/components/ErrorModal.tsx",
+      },
+      shared: {
+        react: "^19.0.0",
+        "react-dom": "^19.0.0",
+        "react-router-dom": "^7.0.0",
+        "@clerk/react": "^5.0.0",
+      },
+    }),
+  ],
   resolve: {
-    alias: [
-      // 🛒 1. Handle "@store/*" prefixes cleanly using your custom resolver logic
-      {
-        find: /^@store\/(.*)$/,
-        replacement: "$1",
-        customResolver(updatedId, importer) {
-          return path.resolve(__dirname, "./src", updatedId);
-        },
-      },
-      {
-        find: /^@\/(.*)$/,
-        replacement: "$1",
-        customResolver(updatedId, importer) {
-          // 1. If the file importing this code lives inside store-client, resolve it inside store-client/src
-          if (importer && importer.includes("apps/store-client")) {
-            return path.resolve(__dirname, "./src", updatedId);
-          }
-
-          // 2. If it walks from ui-core, build the raw absolute target track
-          const baseUIPath = path.resolve(
-            __dirname,
-            "../../packages/ui-core/src",
-            updatedId,
-          );
-
-          // 3. 🛡️ Try structural extensions on the fly so Vite finds the true files!
-          if (fs.existsSync(`${baseUIPath}.tsx`)) return `${baseUIPath}.tsx`;
-          if (fs.existsSync(`${baseUIPath}.ts`)) return `${baseUIPath}.ts`;
-          if (fs.existsSync(`${baseUIPath}.jsx`)) return `${baseUIPath}.jsx`;
-          if (fs.existsSync(`${baseUIPath}.js`)) return `${baseUIPath}.js`;
-          return baseUIPath;
-        },
-      },
-    ],
+    /* 🚀 THE STABLE ALIAS MAP: Maps local @store/ requests cleanly to src/ for local compilation */
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+      "@store": path.resolve(__dirname, "./src"),
+      "@ecom/ui-core": path.resolve(__dirname, "../../packages/ui-core"),
+    },
+    extensions: [".tsx", ".ts", ".jsx", ".js", ".json"],
   },
+  server: {
+    port: 5175,
+    strictPort: true,
+    cors: true,
+    headers: { "Access-Control-Allow-Origin": "*" },
+  },
+  preview: { port: 5175, strictPort: true, cors: true },
+  build: { target: "esnext", minify: false, cssCodeSplit: false },
 });

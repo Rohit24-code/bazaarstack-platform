@@ -1,23 +1,23 @@
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { SIZE_OPTIONS } from "@/features/admin/products/constants"
-import type { ProductCategory } from "@/features/admin/products/types"
+import { Button } from "@ecom/ui-core";
+import { Separator } from "@ecom/ui-core";
+import { SIZE_OPTIONS } from "@/features/customer/products/constants";
+import type { ProductCategory } from "@/features/customer/products/types";
 import {
   BRAND_OPTIONS,
   getSwatchColor,
   type CustomerProductFilters,
   type FacetKey,
-} from "@/features/customer/products/productListShare"
-import { customerFilterStyles } from "../constants"
+} from "@/features/customer/products/productListShare";
+import { customerFilterStyles } from "../constants";
 
 type CustomerFiltersPanelProps = {
-  categories: ProductCategory[]
-  filters: CustomerProductFilters
-  availableColors: string[]
-  hasActiveFilters: boolean
-  onToggleFacet: (key: FacetKey, value: string) => void
-  onClearFilters: () => void
-}
+  categories: ProductCategory[];
+  filters: CustomerProductFilters;
+  availableColors: string[];
+  hasActiveFilters: boolean;
+  onToggleFacet: (key: FacetKey, value: string) => void;
+  onClearFilters: () => void;
+};
 
 function CustomerFiltersPanel({
   categories,
@@ -51,7 +51,7 @@ function CustomerFiltersPanel({
 
         <div className={customerFilterStyles.stackedOptionsClass}>
           {categories.map((item) => {
-            const isActive = filters.category === item._id
+            const isActive = filters.category === item._id;
 
             return (
               <Button
@@ -63,7 +63,7 @@ function CustomerFiltersPanel({
               >
                 {item.name}
               </Button>
-            )
+            );
           })}
         </div>
       </section>
@@ -73,7 +73,7 @@ function CustomerFiltersPanel({
         <h3 className={customerFilterStyles.sectionTitleClass}>Brands</h3>
         <div className={customerFilterStyles.stackedOptionsClass}>
           {BRAND_OPTIONS.map((brand) => {
-            const isActive = filters.brand === brand
+            const isActive = filters.brand === brand;
 
             return (
               <Button
@@ -85,7 +85,7 @@ function CustomerFiltersPanel({
               >
                 {brand}
               </Button>
-            )
+            );
           })}
         </div>
       </section>
@@ -95,7 +95,7 @@ function CustomerFiltersPanel({
         <h3 className={customerFilterStyles.sectionTitleClass}>Colors</h3>
         <div className={customerFilterStyles.colorsWrapClass}>
           {availableColors.map((color) => {
-            const isActive = filters.color === color
+            const isActive = filters.color === color;
 
             return (
               <button
@@ -115,7 +115,7 @@ function CustomerFiltersPanel({
                   style={{ backgroundColor: getSwatchColor(color) }}
                 />
               </button>
-            )
+            );
           })}
         </div>
       </section>
@@ -124,8 +124,8 @@ function CustomerFiltersPanel({
       <section className={customerFilterStyles.sectionClass}>
         <h3 className={customerFilterStyles.sectionTitleClass}>Sizes</h3>
         <div className={customerFilterStyles.sizesWrapClass}>
-          {SIZE_OPTIONS.map((size) => {
-            const isActive = filters.size === size
+          {SIZE_OPTIONS.map((size: "S" | "M" | "L" | "XL") => {
+            const isActive = filters.size === size;
 
             return (
               <Button
@@ -137,13 +137,13 @@ function CustomerFiltersPanel({
               >
                 {size}
               </Button>
-            )
+            );
           })}
         </div>
       </section>
       <Separator />
     </div>
-  )
+  );
 }
 
-export default CustomerFiltersPanel
+export default CustomerFiltersPanel;

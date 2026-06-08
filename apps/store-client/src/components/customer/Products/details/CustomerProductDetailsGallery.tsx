@@ -1,21 +1,21 @@
-import { Card } from "@/components/ui/card"
-import { getCoverImage } from "@/features/customer/products/productListShare"
-import type { CustomerProduct } from "@/features/customer/products/types"
-import { customerProductDetailsGalleryStyles } from "../../constants"
+import { Card } from "@ecom/ui-core";
+import { getCoverImage } from "@/features/customer/products/productListShare";
+import type { CustomerProduct } from "@/features/customer/products/types";
+import { customerProductDetailsGalleryStyles } from "../../constants";
 
 type CustomerProductDetailsGalleryProps = {
-  product: CustomerProduct
-  selectedImage: string
-  setSelectedImage: (value: string) => void
-}
+  product: CustomerProduct;
+  selectedImage: string;
+  setSelectedImage: (value: string) => void;
+};
 
 function CustomerProductDetailsGallery({
   product,
   selectedImage,
   setSelectedImage,
 }: CustomerProductDetailsGalleryProps) {
-  const galleryImages = product.images || []
-  const displayImage = selectedImage || getCoverImage(product)
+  const galleryImages = product.images || [];
+  const displayImage = selectedImage || getCoverImage(product);
 
   return (
     <div className={customerProductDetailsGalleryStyles.galleryWrapClass}>
@@ -40,7 +40,7 @@ function CustomerProductDetailsGallery({
           className={customerProductDetailsGalleryStyles.thumbnailsGridClass}
         >
           {galleryImages.map((item) => {
-            const isActive = displayImage === item.url
+            const isActive = displayImage === item.url;
 
             return (
               <button
@@ -65,12 +65,12 @@ function CustomerProductDetailsGallery({
                   />
                 </div>
               </button>
-            )
+            );
           })}
         </div>
       ) : null}
     </div>
-  )
+  );
 }
 
-export default CustomerProductDetailsGallery
+export default CustomerProductDetailsGallery;

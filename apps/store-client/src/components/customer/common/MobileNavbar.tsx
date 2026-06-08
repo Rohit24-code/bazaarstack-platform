@@ -4,7 +4,7 @@ import {
   mobileNavStyles,
   navPages,
   styles,
-} from "./constants"
+} from "./constants";
 
 import {
   Sheet,
@@ -12,50 +12,56 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet"
-import { Heart, Menu, ShoppingBag, Store } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Link } from "react-router-dom"
-import { Separator } from "@/components/ui/separator"
-import DrawerSection from "./DrawerSection"
-import type { NavItem } from "@/components/common/types"
-import { useCustomerWishlistStore } from "@/features/customer/wishlist/store"
-import { useEffect } from "react"
-import { useAuth } from "@clerk/react"
-import { useAuthStore } from "@/features/auth/store"
+} from "@ecom/ui-core";
+import { Heart, Menu, ShoppingBag, Store } from "lucide-react";
+import { Button } from "@ecom/ui-core";
+import { Link } from "react-router-dom";
+import { Separator } from "@ecom/ui-core";
+import DrawerSection from "./DrawerSection";
+import type { NavItem } from "@/components/common/types";
+import { useCustomerWishlistStore } from "@/features/customer/wishlist/store";
+import { useEffect } from "react";
+import { useAuth } from "@clerk/react";
+import { useAuthStore } from "@/features/auth/store";
 
 type Props = {
-  isSignedIn: boolean
-}
+  isSignedIn: boolean;
+};
 
 const CustomerMobileNavbar = ({ isSignedIn }: Props) => {
   const mobileAccountItems: NavItem[] = isSignedIn
     ? mobileNavLoginPages
-    : mobileNavLogOutPages
+    : mobileNavLogOutPages;
 
-  const { signOut, isLoaded } = useAuth()
-  const { isBootStrapped } = useAuthStore()
+  const { signOut, isLoaded } = useAuth();
+  const { isBootStrapped } = useAuthStore();
 
   const {
     items: wishlistItems,
     loadWishlist,
     clear: clearWishlist,
     setOpen: setWishListOpen,
-  } = useCustomerWishlistStore((state) => state)
+  } = useCustomerWishlistStore((state) => state);
 
   useEffect(() => {
-    if (!isLoaded || !isBootStrapped) return
+    if (!isLoaded || !isBootStrapped) return;
 
     if (!isSignedIn) {
-      clearWishlist()
-      return
+      clearWishlist();
+      return;
     }
 
-    loadWishlist()
-  }, [clearWishlist, isBootStrapped, isSignedIn, loadWishlist, setWishListOpen])
+    loadWishlist();
+  }, [
+    clearWishlist,
+    isBootStrapped,
+    isSignedIn,
+    loadWishlist,
+    setWishListOpen,
+  ]);
 
-  const showSignInUi = isLoaded && isBootStrapped && isSignedIn
-  const wishListCount = wishlistItems.length
+  const showSignInUi = isLoaded && isBootStrapped && isSignedIn;
+  const wishListCount = wishlistItems.length;
 
   return (
     <div className={mobileNavStyles?.mobileWrap}>
@@ -109,7 +115,7 @@ const CustomerMobileNavbar = ({ isSignedIn }: Props) => {
         </SheetContent>
       </Sheet>
     </div>
-  )
-}
+  );
+};
 
-export default CustomerMobileNavbar
+export default CustomerMobileNavbar;

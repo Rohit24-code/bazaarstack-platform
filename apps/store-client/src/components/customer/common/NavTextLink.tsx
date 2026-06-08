@@ -1,6 +1,7 @@
-import { Link } from "react-router-dom"
-import type { NavItem } from "./types"
-import { styles } from "./constants"
+import { Link } from "react-router-dom";
+
+import { styles } from "./constants";
+import { NavItem } from "@/components/common/types";
 
 export function NavTextLink({ label, href, icon: Icon }: NavItem) {
   return (
@@ -8,5 +9,5 @@ export function NavTextLink({ label, href, icon: Icon }: NavItem) {
       <Icon className={"h-4.5 w-4.5"} />
       <span>{label}</span>
     </Link>
-  )
+  );
 }

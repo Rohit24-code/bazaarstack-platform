@@ -1,20 +1,20 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "@ecom/ui-core";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { useCustomerWishlistStore } from "@/features/customer/wishlist/store"
-import { formatPrice } from "@/lib/utils"
-import { Heart, Trash2 } from "lucide-react"
-import { Link } from "react-router-dom"
-import { customerWishlistStyles } from "../constants"
+} from "@ecom/ui-core";
+import { useCustomerWishlistStore } from "@/features/customer/wishlist/store";
+import { formatPrice } from "@/lib/utils";
+import { Heart, Trash2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { customerWishlistStyles } from "../constants";
 
 function CustomerWishlistDialog() {
   const { isOpen, setOpen, items, removeItem } = useCustomerWishlistStore(
-    (state) => state
-  )
+    (state) => state,
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={setOpen}>
@@ -94,7 +94,7 @@ function CustomerWishlistDialog() {
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
-export default CustomerWishlistDialog
+export default CustomerWishlistDialog;

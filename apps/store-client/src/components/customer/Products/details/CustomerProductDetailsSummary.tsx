@@ -1,31 +1,31 @@
-import { extractSalePrice } from "@/features/customer/products/productListShare"
+import { extractSalePrice } from "@/features/customer/products/productListShare";
 import type {
   CustomerProduct,
   ProductSize,
-} from "@/features/customer/products/types"
-import { Badge } from "@/components/ui/badge"
-import { formatPrice } from "@/lib/utils"
-import { Separator } from "@/components/ui/separator"
-import { Button } from "@/components/ui/button"
-import { Heart, ShoppingBag, StarIcon } from "lucide-react"
-import { customerProductDetailsSummaryStyles } from "../../constants"
-import CustomerProductOptionsGroup from "./CustomerProductOptionsGroup"
-import { useCustomerProductDetailsStore } from "@/features/customer/products/useCustomerDetails"
-import { Textarea } from "@/components/ui/textarea"
-import { useAuthStore } from "@/features/auth/store"
-import { useParams } from "react-router-dom"
-import CustomerProductReviews from "./CustomerProductReviews"
+} from "@/features/customer/products/types";
+import { Badge } from "@ecom/ui-core";
+import { formatPrice } from "@/lib/utils";
+import { Separator } from "@ecom/ui-core";
+import { Button } from "@ecom/ui-core";
+import { Heart, ShoppingBag, StarIcon } from "lucide-react";
+import { customerProductDetailsSummaryStyles } from "../../constants";
+import CustomerProductOptionsGroup from "./CustomerProductOptionsGroup";
+import { useCustomerProductDetailsStore } from "@/features/customer/products/useCustomerDetails";
+import { Textarea } from "@ecom/ui-core";
+import { useAuthStore } from "@/features/auth/store";
+import { useParams } from "react-router-dom";
+import CustomerProductReviews from "./CustomerProductReviews";
 
 type CustomerProductDetailsSummaryProps = {
-  product: CustomerProduct
-  selectedColor: string
-  selectedSize: string
-  setSelectedColor: (value: string) => void
-  setSelectedSize: (value: ProductSize) => void
-  toggleWishlist: () => Promise<void>
-  isWishlistActive: boolean
-  onAddToCart: () => Promise<void>
-}
+  product: CustomerProduct;
+  selectedColor: string;
+  selectedSize: string;
+  setSelectedColor: (value: string) => void;
+  setSelectedSize: (value: ProductSize) => void;
+  toggleWishlist: () => Promise<void>;
+  isWishlistActive: boolean;
+  onAddToCart: () => Promise<void>;
+};
 
 function CustomerProductDetailsSummary({
   product,
@@ -37,9 +37,9 @@ function CustomerProductDetailsSummary({
   isWishlistActive,
   onAddToCart,
 }: CustomerProductDetailsSummaryProps) {
-  const salePrice = extractSalePrice(product)
-  const hasSale = product.salePercentage > 0
-  const { id } = useParams()
+  const salePrice = extractSalePrice(product);
+  const hasSale = product.salePercentage > 0;
+  const { id } = useParams();
 
   const {
     review,
@@ -48,8 +48,11 @@ function CustomerProductDetailsSummary({
     setReview,
     setReviewComment,
     submitReview,
-  } = useCustomerProductDetailsStore((state) => state)
-  const { user } = useAuthStore()
+  } = useCustomerProductDetailsStore((state) => state);
+  const { user } = useAuthStore();
+
+  console.log(user, "user");
+
   return (
     <section className={customerProductDetailsSummaryStyles.summaryWrapClass}>
       <div className={customerProductDetailsSummaryStyles.badgesWrapClass}>
@@ -180,7 +183,7 @@ function CustomerProductDetailsSummary({
                       className={`${index + 1 <= review && "fill-amber-300"}`}
                     />
                   </div>
-                )
+                );
               })}
             </div>
 
@@ -212,7 +215,7 @@ function CustomerProductDetailsSummary({
 
       <CustomerProductReviews reviews={allReviews} />
     </section>
-  )
+  );
 }
 
-export default CustomerProductDetailsSummary
+export default CustomerProductDetailsSummary;

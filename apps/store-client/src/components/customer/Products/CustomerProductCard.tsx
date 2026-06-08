@@ -1,25 +1,25 @@
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { customerProductCardStyles } from "../constants"
-import type { CustomerProduct } from "@/features/customer/products/types"
-import { formatPrice } from "@/lib/utils"
+import { Badge } from "@ecom/ui-core";
+import { Button } from "@ecom/ui-core";
+import { Card, CardContent } from "@ecom/ui-core";
+import { customerProductCardStyles } from "../constants";
+import type { CustomerProduct } from "@/features/customer/products/types";
+import { formatPrice } from "@/lib/utils";
 import {
   extractSalePrice,
   getCoverImage,
   getSwatchColor,
-} from "@/features/customer/products/productListShare"
-import { Link } from "react-router-dom"
-import { StarIcon } from "lucide-react"
+} from "@/features/customer/products/productListShare";
+import { Link } from "react-router-dom";
+import { StarIcon } from "lucide-react";
 
 type CustomerProductCardProps = {
-  product: CustomerProduct
-}
+  product: CustomerProduct;
+};
 
 const CustomerProductCard = ({ product }: CustomerProductCardProps) => {
-  const coverImage = getCoverImage(product)
-  const salePrice = extractSalePrice(product)
-  const hasSale = product.salePercentage > 0
+  const coverImage = getCoverImage(product);
+  const salePrice = extractSalePrice(product);
+  const hasSale = product.salePercentage > 0;
 
   return (
     <Card className={customerProductCardStyles.card}>
@@ -98,7 +98,7 @@ const CustomerProductCard = ({ product }: CustomerProductCardProps) => {
         </CardContent>
       </Link>
     </Card>
-  )
-}
+  );
+};
 
-export default CustomerProductCard
+export default CustomerProductCard;

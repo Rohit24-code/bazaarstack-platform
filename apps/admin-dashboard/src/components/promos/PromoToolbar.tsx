@@ -1,6 +1,6 @@
 import { promoToolbarStyles } from "@/pages/admin/constants"
-import { Button } from "../ui/button"
-import { Input } from "../ui/input"
+import { Button } from "@ecom/ui-core"
+import { Input } from "@ecom/ui-core"
 import { Plus, Search } from "lucide-react"
 import { useAdminPromoStore } from "@/features/admin/Promo/useAdminPromStore"
 

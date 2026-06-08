@@ -1,10 +1,10 @@
-import { Button } from "@store/components/ui/button";
+import { Button } from "@ecom/ui-core";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@store/components/ui/dropdown-menu";
+} from "@ecom/ui-core";
 import { useAuth } from "@clerk/react";
 import {
   Heart,
