@@ -1,7 +1,6 @@
 import { create } from "zustand"
 
 import { toast } from "sonner"
-import { getCustomerProductDetails, getReviews, postReview } from "./api"
 import { getCoverImage } from "./productListShare"
 import {
   addCustomerWishlist,
@@ -9,105 +8,59 @@ import {
 } from "../wishlist/api"
 import { useCustomerWishlistStore } from "../wishlist/store"
 import { useCustomerCartAndCheckoutStore } from "../cartAndCheckout/store"
-import type { CustomerProductDetailsResponse, ProductSize } from "./types"
+import type { CustomerProduct, ProductSize } from "./types"
 
 type CustomerProductDetailsStore = {
-  loading: boolean
-  data: CustomerProductDetailsResponse | null
   selectedImage: string
   selectedColor: string
   selectedSize: ProductSize | ""
   review: number
-  allReviews: any[]
   reviewComment: string
   setReview: (value: number) => void
   setReviewComment: (value: string) => void
-  loadProduct: (productId: string) => Promise<void>
+  initProductState: (product: CustomerProduct) => void
   clear: () => void
   setSelectedImage: (value: string) => void
   setSelectedColor: (value: string) => void
   setSelectedSize: (value: ProductSize | "") => void
-  submitReview: ({
-    productId,
-    userId,
-  }: {
-    productId: string
-    userId: string
-  }) => void
   addToCart: (
+    product: CustomerProduct,
     isLoaded: boolean,
     isBootstrapped: boolean,
     isSignedIn: boolean
   ) => Promise<void>
   toggleWishlist: (
+    product: CustomerProduct,
     isLoaded: boolean,
     isBootstrapped: boolean,
     isSignedIn: boolean,
     isWishlistActive: boolean
   ) => Promise<void>
+  submitReview: (
+    productId: string | undefined,
+    userId: string | undefined,
+    submitReviewMutate: any
+  ) => void
 }
 
 const defaultState = {
-  loading: true,
-  data: null,
   selectedImage: "",
   selectedColor: "",
   selectedSize: "" as ProductSize | "",
   review: 0,
   reviewComment: "",
-  allReviews: [],
 }
 
 export const useCustomerProductDetailsStore =
   create<CustomerProductDetailsStore>((set, get) => ({
     ...defaultState,
-    loadProduct: async (productId) => {
-      if (!productId) {
-        set({
-          loading: false,
-          data: null,
-          selectedImage: "",
-          selectedColor: "",
-          selectedSize: "",
-          reviewComment: "",
-          review: 0,
-        })
-      }
-
+    initProductState: (product) => {
       set({
-        loading: true,
-        data: null,
-        selectedImage: "",
-        selectedColor: "",
-        selectedSize: "",
+        selectedImage: product ? getCoverImage(product) : "",
+        selectedColor: product?.colors?.[0] || "",
+        selectedSize: product?.sizes?.[0] || "",
       })
-
-      try {
-        const [response, reviewResponse] = await Promise.all([
-          getCustomerProductDetails(productId),
-          getReviews(productId),
-        ])
-        const product = response?.product ?? null
-
-        set({
-          loading: false,
-          data: response ?? null,
-          selectedImage: product ? getCoverImage(product) : "",
-          selectedColor: product?.colors?.[0] || "",
-          selectedSize: product?.sizes?.[0] || "",
-          allReviews: (reviewResponse as any) ?? [],
-        })
-      } catch {
-        set({
-          loading: false,
-          data: null,
-          selectedImage: "",
-          selectedColor: "",
-          selectedSize: "",
-        })
-      }
     },
-
     clear: () => set(defaultState),
     setReview: (value: number) => {
       set({ review: value })
@@ -119,13 +72,12 @@ export const useCustomerProductDetailsStore =
     setSelectedColor: (value) => set({ selectedColor: value }),
     setSelectedSize: (value) => set({ selectedSize: value }),
     toggleWishlist: async (
+      product,
       isLoaded,
       isBootstrapped,
       isSignedIn,
       isWishlistActive
     ) => {
-      const product = get().data?.product ?? null
-
       if (!product) return
 
       if (!isLoaded || !isBootstrapped || !isSignedIn) {
@@ -150,9 +102,8 @@ export const useCustomerProductDetailsStore =
         toast.error("Failed to toggle wishlist items")
       }
     },
-    addToCart: async (isLoaded, isBootatraped, isSignedIn) => {
-      const { data, selectedColor, selectedSize } = get()
-      const product = data?.product ?? null
+    addToCart: async (product, isLoaded, isBootatraped, isSignedIn) => {
+      const { selectedColor, selectedSize } = get()
 
       if (!product || product.stock < 1) return
 
@@ -177,30 +128,27 @@ export const useCustomerProductDetailsStore =
         isSignedIn
       )
     },
-    submitReview: async ({ productId, userId }) => {
-      try {
-        let body = {
+    submitReview: (productId, userId, submitReviewMutate) => {
+      const { review, reviewComment, setReviewComment, setReview } = get()
+      if (!productId || !userId) return;
+      
+      submitReviewMutate(
+        {
           product: productId,
           user: userId,
-          comment: get().reviewComment,
-          rating: get().review,
+          comment: reviewComment,
+          rating: review,
+        },
+        {
+          onSuccess: () => {
+            setReviewComment("");
+            setReview(0);
+            toast.success("Review submitted");
+          },
+          onError: () => {
+            toast.error("Failed to submit review");
+          },
         }
-
-        await postReview(body)
-      } catch (error) {
-        toast.error("Failed to submit review")
-      } finally {
-        set({ reviewComment: "" })
-        set({ review: 0 })
-        getReviews(productId)
-      }
-    },
-    getReviews: async (productId: string) => {
-      try {
-        let getSingleProductReview: any = await getReviews(productId)
-        set({ allReviews: getSingleProductReview })
-      } catch (error) {
-        toast.error("Failed to fetch review")
-      }
+      );
     },
   }))

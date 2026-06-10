@@ -2,7 +2,7 @@ import { Badge } from "@ecom/ui-core";
 import { Button } from "@ecom/ui-core";
 import { Card, CardContent } from "@ecom/ui-core";
 import { customerProductCardStyles } from "../constants";
-import type { CustomerProduct } from "@/features/customer/products/types";
+
 import { formatPrice } from "@/lib/utils";
 import {
   extractSalePrice,
@@ -11,6 +11,7 @@ import {
 } from "@/features/customer/products/productListShare";
 import { Link } from "react-router-dom";
 import { StarIcon } from "lucide-react";
+import { CustomerProduct } from "@ecom/api-client/src/types/products";
 
 type CustomerProductCardProps = {
   product: CustomerProduct;

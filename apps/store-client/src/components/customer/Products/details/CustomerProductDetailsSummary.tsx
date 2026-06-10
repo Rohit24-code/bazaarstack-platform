@@ -10,10 +10,7 @@ import { Button } from "@ecom/ui-core";
 import { Heart, ShoppingBag, StarIcon } from "lucide-react";
 import { customerProductDetailsSummaryStyles } from "../../constants";
 import CustomerProductOptionsGroup from "./CustomerProductOptionsGroup";
-import { useCustomerProductDetailsStore } from "@/features/customer/products/useCustomerDetails";
 import { Textarea } from "@ecom/ui-core";
-import { useAuthStore } from "@/features/auth/store";
-import { useParams } from "react-router-dom";
 import CustomerProductReviews from "./CustomerProductReviews";
 
 type CustomerProductDetailsSummaryProps = {
@@ -25,6 +22,13 @@ type CustomerProductDetailsSummaryProps = {
   toggleWishlist: () => Promise<void>;
   isWishlistActive: boolean;
   onAddToCart: () => Promise<void>;
+  allReviews: any[];
+  onSubmitReview: () => void;
+  review: number;
+  reviewComment: string;
+  setReview: (value: number) => void;
+  setReviewComment: (value: string) => void;
+  showReviewForm: boolean;
 };
 
 function CustomerProductDetailsSummary({
@@ -36,22 +40,16 @@ function CustomerProductDetailsSummary({
   toggleWishlist,
   isWishlistActive,
   onAddToCart,
+  allReviews,
+  onSubmitReview,
+  review,
+  reviewComment,
+  setReview,
+  setReviewComment,
+  showReviewForm,
 }: CustomerProductDetailsSummaryProps) {
   const salePrice = extractSalePrice(product);
   const hasSale = product.salePercentage > 0;
-  const { id } = useParams();
-
-  const {
-    review,
-    reviewComment,
-    allReviews,
-    setReview,
-    setReviewComment,
-    submitReview,
-  } = useCustomerProductDetailsStore((state) => state);
-  const { user } = useAuthStore();
-
-  console.log(user, "user");
 
   return (
     <section className={customerProductDetailsSummaryStyles.summaryWrapClass}>
@@ -168,7 +166,7 @@ function CustomerProductDetailsSummary({
         </Button>
       </div>
 
-      {user?.id && (
+      {showReviewForm && (
         <>
           <div className={customerProductDetailsSummaryStyles.reviewContainer}>
             <div className="flex gap-0.5">
@@ -200,12 +198,7 @@ function CustomerProductDetailsSummary({
               className={
                 customerProductDetailsSummaryStyles.secondaryButtonClass
               }
-              onClick={() =>
-                submitReview({
-                  productId: id as string,
-                  userId: user?.id as string,
-                })
-              }
+              onClick={onSubmitReview}
             >
               Submit Review
             </Button>

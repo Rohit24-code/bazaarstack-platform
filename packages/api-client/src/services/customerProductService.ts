@@ -1,4 +1,4 @@
-import { ApiClient } from "../index";
+import type { ApiClient } from "../index";
 import type {
   CustomerProduct,
   CustomerProductDetailsResponse,
@@ -29,6 +29,8 @@ export async function getCustomerProducts(
     ? `/customer/products?${queryString}`
     : `/customer/products`;
 
+  console.log(url, "uirllsjdflj");
+
   return api.get<CustomerProduct[]>(url);
 }
 
@@ -46,5 +48,6 @@ export async function postReview(api: ApiClient, body: CustomerReviewPayload) {
 }
 
 export async function getReviews(api: ApiClient, id: string) {
+  console.log(api, "apiapiapi");
   return api.get<any>(`customer/review?id=${id}`);
 }

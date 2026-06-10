@@ -11,16 +11,16 @@ import type {
   CustomerProductFilters,
   FacetKey,
 } from "./productListShare";
-import { getCustomerCategories, getCustomerProducts } from "./api";
+import {
+  useCustomerCategories,
+  useCustomerProduct,
+} from "./api/useCustomerProduct";
 
 export function useCustomerProductList() {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [products, setProducts] = useState<CustomerProduct[]>([]);
-  const [availableColors, setAvailableColors] = useState<string[]>([]);
-
-  const [loading, setLoading] = useState(false);
+  const { isLoading: isCategoriesLoading, data: categories = [] } =
+    useCustomerCategories();
 
   const filters = useMemo<CustomerProductFilters>(
     () => ({
@@ -45,29 +45,12 @@ export function useCustomerProductList() {
     [filters, sort],
   );
 
+  const { isLoading: isProductLoading, data: products = [] } =
+    useCustomerProduct(query);
+
   const hasActiveFilters = Boolean(
     filters.category || filters.brand || filters.color || filters.size,
   );
-
-  async function loadCategories() {
-    try {
-      const data = await getCustomerCategories();
-      setCategories(data ?? []);
-    } catch {
-      setCategories([]);
-    }
-  }
-
-  async function loadProducts(params: GetCustomerProductsParams) {
-    setLoading(true);
-
-    try {
-      const data = await getCustomerProducts(params);
-      setProducts(data ?? []);
-    } finally {
-      setLoading(false);
-    }
-  }
 
   // update params -> when user will select or deselect filters/sort
   const updateParams = useCallback(
@@ -76,6 +59,16 @@ export function useCustomerProductList() {
     },
     [setSearchParams],
   );
+
+  const { data: rawBaseProducts = [] } = useCustomerProduct({});
+
+  const availableColors = useMemo<string[]>(() => {
+    const uniqueColors = new Set<string>();
+    rawBaseProducts.forEach((item: any) => {
+      item.colors?.forEach((color: any) => uniqueColors.add(color));
+    });
+    return Array.from(uniqueColors).sort((a, b) => a.localeCompare(b));
+  }, [rawBaseProducts]);
 
   // toggle filter facets
   const toggleFacet = useCallback(
@@ -121,25 +114,6 @@ export function useCustomerProductList() {
     updateParams(nextValue);
   }, [searchParams, updateParams]);
 
-  // available colors
-  async function loadAvailableColors() {
-    try {
-      setLoading(true);
-      const data = await getCustomerProducts();
-      const uniqueColors = new Set<string>();
-
-      (data ?? []).forEach((item) => {
-        item.colors.forEach((color) => uniqueColors.add(color));
-      });
-
-      setAvailableColors(
-        Array.from(uniqueColors).sort((a, b) => a.localeCompare(b)),
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
-
   // active filter badges
   const activeFilterBadges = useMemo<ActiveFilterBadge[]>(() => {
     const items: ActiveFilterBadge[] = [];
@@ -181,19 +155,11 @@ export function useCustomerProductList() {
     return items;
   }, [categories, filters]);
 
-  useEffect(() => {
-    loadCategories();
-    loadAvailableColors();
-  }, []);
-
-  useEffect(() => {
-    loadProducts(query);
-  }, [query]);
-
   return {
     categories,
     products,
-    loading,
+    isProductLoading,
+    isCategoriesLoading,
     filters,
     sort,
     hasActiveFilters,

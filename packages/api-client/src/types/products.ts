@@ -1,35 +1,44 @@
-export interface ProductCategory {
+// export interface ProductCategory {
+//   _id: string;
+//   name: string;
+//   slug: string;
+//   description?: string;
+//   image?: string;
+//   isActive: boolean;
+//   createdAt: string;
+//   updatedAt: string;
+// }
+export type ProductSort = "recent" | "price-low" | "price-high";
+
+export type ProductSize = "S" | "M" | "L" | "XL";
+
+export type ProductCategory = {
   _id: string;
   name: string;
-  slug: string;
-  description?: string;
-  image?: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+};
+
+export type ProductImage = {
+  url: string;
+  publicId: string;
+  isCover: boolean;
+};
 
 export interface CustomerProduct {
   _id: string;
-  name: string;
-  slug: string;
+  title: string;
   description: string;
-  price: number;
-  salePrice?: number;
-  images: string[];
-  category: string | ProductCategory;
+  category: ProductCategory;
   brand: string;
-  variants?: Array<{
-    size?: string;
-    color?: string;
-    stock: number;
-  }>;
-  rating: number;
-  numReviews: number;
-  isFeatured: boolean;
-  isActive: boolean;
+  stock: number;
+  images: ProductImage[];
+  colors: string[];
+  sizes: ProductSize[];
+  price: number;
+  salePercentage: number;
+  status: "active" | "inactive";
   createdAt: string;
   updatedAt: string;
+  avgRating?: number;
 }
 
 export interface Review {
@@ -51,8 +60,9 @@ export interface CustomerProductDetailsResponse {
 }
 
 export interface CustomerReviewPayload {
-  productId: string;
-  rating: number;
+  user: string;
+  product: string;
+  rating?: number;
   comment: string;
 }
 

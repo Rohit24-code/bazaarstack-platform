@@ -21,12 +21,14 @@ import { useCustomerProductList } from "@/features/customer/products/useCustomer
 import type { ProductSort } from "@/features/customer/products/types";
 import CustomerProductCard from "@/components/customer/Products/CustomerProductCard";
 import CustomerFiltersPanel from "@/components/customer/Products/CustomerFilterPanel";
+import { CustomerProduct } from "@ecom/api-client/src/types/products";
 
 const Collections = () => {
   const {
     sort,
     changeSort,
-    loading,
+    isCategoriesLoading,
+    isProductLoading,
     products,
     hasActiveFilters,
     categories,
@@ -133,7 +135,7 @@ const Collections = () => {
           </aside>
 
           <section className={productCollectionStyles.productSection}>
-            {!loading && !products.length ? (
+            {!isProductLoading && !products.length ? (
               <Card className={productCollectionStyles.emptyCard}>
                 <CardContent
                   className={productCollectionStyles.emptyCardContent}
@@ -153,9 +155,9 @@ const Collections = () => {
               </Card>
             ) : null}
 
-            {!loading && products.length ? (
+            {!isProductLoading && products.length ? (
               <div className={productCollectionStyles.productGrid}>
-                {products.map((item) => (
+                {products.map((item: CustomerProduct) => (
                   <CustomerProductCard key={item._id} product={item} />
                 ))}
               </div>
