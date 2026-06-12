@@ -30,52 +30,77 @@ import { useCustomerOrdersStore } from "@/features/customer/orders/store";
 import CustomerProfileDialog from "../Profile/CustomerProfileDialog";
 import CustomerOrdersDialog from "../Order/CustomerOrderDialog";
 import CustomerCartAndCheckoutDrawer from "../CustomerCartAndCheckoutDrawer/CustomerCartAndCheckoutDrawer";
+import {
+  useGetCustomerCart,
+  useSyncCustomerCart,
+} from "@/features/customer/cartAndCheckout/api/useCustomerCart";
+import { useCustomerWishListQuery } from "@/features/customer/wishlist/Hooks/useWishListApi";
 
 function CustomerNavbar() {
   const { isSignedIn, signOut, isLoaded } = useAuth();
   const { isBootStrapped } = useAuthStore();
 
-  const {
-    items: wishlistItems,
-    loadWishlist,
-    clear: clearWishlist,
-    setOpen: setWishlistOpen,
-  } = useCustomerWishlistStore((state) => state);
-
+  const { clear: clearWishlist, setOpen: setWishlistOpen } =
+    useCustomerWishlistStore((state) => state);
+  const { data: wishlistItems } = useCustomerWishListQuery();
   const { openProfile, clear: clearProfile } = useCustomerProfileStore(
     (state) => state,
   );
 
-  const { setOpen, cart, loadCart } = useCustomerCartAndCheckoutStore(
-    (state) => state,
-  );
+  const { setOpen, guestCart, loadGuestCart, clearGuestCart } =
+    useCustomerCartAndCheckoutStore((state) => state);
 
   const { openOrders } = useCustomerOrdersStore((state) => state);
+
+  const { data: cartResponse } = useGetCustomerCart(!!isSignedIn);
+  const { mutate: syncCartMutate } = useSyncCustomerCart();
 
   useEffect(() => {
     if (!isLoaded || !isBootStrapped) return;
 
-    void loadCart(Boolean(isSignedIn));
-
     if (!isSignedIn) {
+      loadGuestCart();
       clearWishlist();
       clearProfile();
       return;
     }
 
-    void loadWishlist();
+    if (guestCart.items.length > 0) {
+      syncCartMutate(
+        {
+          items: guestCart.items.map((item) => ({
+            productId: item.productId,
+            quantity: item.quantity,
+            color: item.color,
+            size: item.size,
+          })),
+        },
+        {
+          onSuccess: () => {
+            clearGuestCart();
+          },
+        },
+      );
+    }
   }, [
     clearWishlist,
     isBootStrapped,
     clearProfile,
     isSignedIn,
     isLoaded,
-    loadWishlist,
-    loadCart,
+
+    loadGuestCart,
+    guestCart.items.length,
+    syncCartMutate,
+    clearGuestCart,
   ]);
 
   const showSignInUi = isLoaded && isBootStrapped && isSignedIn;
-  const wishlistCount = wishlistItems.length;
+  const wishlistCount = wishlistItems?.items?.length;
+
+  const cartItemsCount = isSignedIn
+    ? cartResponse?.items?.length || 0
+    : guestCart.items.length;
 
   return (
     <header className={styles.headerClass}>
@@ -153,7 +178,7 @@ function CustomerNavbar() {
 
           <div onClick={() => setOpen(true)} className={styles.iconLink}>
             <ShoppingCart className="h-4.5 w-4.5" />
-            <span className={styles.cartBadge}>{cart?.items?.length}</span>
+            <span className={styles.cartBadge}>{cartItemsCount}</span>
           </div>
         </nav>
 

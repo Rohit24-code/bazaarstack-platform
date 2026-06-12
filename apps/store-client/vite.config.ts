@@ -1,7 +1,9 @@
-import { defineConfig } from "vite";
+/// <reference types="vitest" />
+import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
+import tsconfigPaths from "vite-tsconfig-paths";
 import federation from "@originjs/vite-plugin-federation";
 
 export default defineConfig({
@@ -10,6 +12,7 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    tsconfigPaths(),
     federation({
       name: "storefront",
       filename: "remoteEntry.js",
@@ -36,6 +39,11 @@ export default defineConfig({
       "@ecom/ui-core": path.resolve(__dirname, "../../packages/ui-core"),
     },
     extensions: [".tsx", ".ts", ".jsx", ".js", ".json"],
+  },
+  test: {
+    globals: true, // Enables global 'describe', 'test', and 'expect' blocks [cite: 200, 342]
+    environment: "jsdom", // Mimics browser DOM behaviors in the Node environment
+    setupFiles: "./src/setupTests.ts", // Points to your custom matchers registration script
   },
   server: {
     port: 5175,

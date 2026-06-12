@@ -1,4 +1,4 @@
-import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/api";
+import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from "@/lib/api";
 import type {
   CustomerAddressFormValues,
   CustomerAddressResponse,
@@ -19,7 +19,7 @@ export async function updateCustomerAddresses(
   addressId: string,
   body: CustomerAddressFormValues,
 ) {
-  return apiPatch<CustomerAddressResponse, CustomerAddressFormValues>(
+  return apiPut<CustomerAddressResponse, CustomerAddressFormValues>(
     `/customer/addresses/${addressId}`,
     body,
   );

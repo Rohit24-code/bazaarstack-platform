@@ -1,4 +1,4 @@
-import { Button, Skeleton } from "@ecom/ui-core";
+import { Button } from "@ecom/ui-core";
 import {
   Dialog,
   DialogContent,
@@ -8,48 +8,50 @@ import {
 import { Input } from "@ecom/ui-core";
 import { Label } from "@ecom/ui-core";
 
-import { useCustomerProfileStore } from "@/features/customer/profile/store";
-import { useUser } from "@clerk/react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { customerProfileStyles } from "../constants";
-import { useGetCheckoutPoints } from "@/features/customer/cartAndCheckout/api/useCustomerCart";
-import {
-  useCreateCustomerAddress,
-  useCustomerAddresses,
-  useDeleteCustomerAddress,
-  useUpdateCustomerAddress,
-} from "@/features/customer/profile/api/useCustomerProfile";
 
-function CustomerProfileDialog() {
-  const { mutateAsync: createCustomerAddress, isPending: isCreating } =
-    useCreateCustomerAddress();
-  const { mutateAsync: updateCustomerAddress, isPending: isUpdating } =
-    useUpdateCustomerAddress();
-  const { mutateAsync: deleteAddress, isPending: isDeleting } =
-    useDeleteCustomerAddress();
-  const { data = { items: [] }, isLoading: isFetchingAddresses } =
-    useCustomerAddresses();
+import type {
+  CustomerAddress,
+  CustomerAddressFormValues,
+} from "@/features/customer/profile/types";
+import { UserResource } from "@clerk/react/types";
 
-  const {
-    isOpen,
-    closeProfile,
-    mode,
-    startAdd,
-    startEdit,
-    updateForm,
-    cancelForm,
-    saveForm,
-    removeAddress,
-    form,
-  } = useCustomerProfileStore();
+interface CustomerProfileDialogPresenterProps {
+  isOpen: boolean;
+  closeProfile: () => void;
+  mode: "none" | "add" | "edit";
+  startAdd: () => void;
+  startEdit: (address: CustomerAddress) => void;
+  updateForm: <K extends keyof CustomerAddressFormValues>(
+    key: K,
+    value: CustomerAddressFormValues[K],
+  ) => void;
+  cancelForm: () => void;
+  saveForm: () => void;
+  removeAddress: (addressId: string) => void;
+  items: CustomerAddress[];
+  form: CustomerAddressFormValues;
+  points: number;
+  user: UserResource | null | undefined;
+}
 
-  const { data: pointsData } = useGetCheckoutPoints();
-  const points = pointsData?.points ?? 0;
-
-  const { user } = useUser();
-
+export function CustomerProfileDialogPresenter({
+  isOpen,
+  closeProfile,
+  mode,
+  startAdd,
+  startEdit,
+  updateForm,
+  cancelForm,
+  saveForm,
+  removeAddress,
+  items,
+  form,
+  points,
+  user,
+}: CustomerProfileDialogPresenterProps) {
   const showForm = mode !== "none";
-  const isMutatingStore = isCreating || isUpdating || isDeleting;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && closeProfile()}>
@@ -101,15 +103,15 @@ function CustomerProfileDialog() {
                 </Button>
               </div>
 
-              {isMutatingStore ? (
-                <div className="space-y-3 mt-4">
-                  <Skeleton className="h-[60px] w-full rounded-lg" />
-                  <Skeleton className="h-[60px] w-full rounded-lg" />
-                  <Skeleton className="h-[60px] w-full rounded-lg" />
-                </div>
-              ) : data?.items?.length ? (
+              {!items.length ? (
+                <p className={customerProfileStyles.emptyClass}>
+                  No address added
+                </p>
+              ) : null}
+
+              {items.length ? (
                 <div className={customerProfileStyles.listClass}>
-                  {data?.items?.map((item) => (
+                  {items.map((item) => (
                     <div
                       key={item._id}
                       className={customerProfileStyles.itemClass}
@@ -145,7 +147,7 @@ function CustomerProfileDialog() {
                           type="button"
                           variant={"default"}
                           className={customerProfileStyles.buttonClass}
-                          onClick={() => removeAddress(deleteAddress, item._id)}
+                          onClick={() => removeAddress(item._id)}
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
                           Delete
@@ -154,11 +156,7 @@ function CustomerProfileDialog() {
                     </div>
                   ))}
                 </div>
-              ) : (
-                <p className={customerProfileStyles.emptyClass}>
-                  No address added
-                </p>
-              )}
+              ) : null}
             </section>
 
             {/* form render here */}
@@ -234,12 +232,7 @@ function CustomerProfileDialog() {
                     type="button"
                     variant={"default"}
                     className={customerProfileStyles.buttonClass}
-                    onClick={() =>
-                      void saveForm(
-                        createCustomerAddress,
-                        updateCustomerAddress,
-                      )
-                    }
+                    onClick={() => void saveForm()}
                   >
                     {mode === "edit" ? "Update Address" : "Save Address"}
                   </Button>
@@ -252,5 +245,3 @@ function CustomerProfileDialog() {
     </Dialog>
   );
 }
-
-export default CustomerProfileDialog;

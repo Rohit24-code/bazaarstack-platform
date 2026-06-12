@@ -18,6 +18,7 @@ export * from "./components/ui/card";
 export * from "./components/ui/table";
 export * from "./components/ui/sonner";
 export * from "./components/ui/DataTable";
+export * from "./components/ui/skeleton";
 export {
   Form as FormContainer,
   FormItem as Field,

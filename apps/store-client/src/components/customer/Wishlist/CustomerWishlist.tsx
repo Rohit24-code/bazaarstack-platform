@@ -10,11 +10,18 @@ import { formatPrice } from "@/lib/utils";
 import { Heart, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { customerWishlistStyles } from "../constants";
+import {
+  useCustomerWishListQuery,
+  useRemoveCustomerWishListQuery,
+} from "@/features/customer/wishlist/Hooks/useWishListApi";
 
 function CustomerWishlistDialog() {
-  const { isOpen, setOpen, items, removeItem } = useCustomerWishlistStore(
+  const { isOpen, setOpen, removeItem } = useCustomerWishlistStore(
     (state) => state,
   );
+  const { data } = useCustomerWishListQuery();
+  const items = data?.items ?? [];
+  const { mutate } = useRemoveCustomerWishListQuery();
 
   return (
     <Dialog open={isOpen} onOpenChange={setOpen}>
@@ -26,13 +33,13 @@ function CustomerWishlistDialog() {
           </DialogTitle>
         </DialogHeader>
         <div className={customerWishlistStyles.contentClass}>
-          {!items.length ? (
+          {!items?.length ? (
             <p className={customerWishlistStyles.emptyClass}>No Products</p>
           ) : null}
 
-          {items.length ? (
+          {items?.length ? (
             <div className={customerWishlistStyles.listClass}>
-              {items.map((item) => (
+              {items?.map((item) => (
                 <div
                   key={item.productId}
                   className={customerWishlistStyles.itemClass}
@@ -80,7 +87,7 @@ function CustomerWishlistDialog() {
                       <Button
                         type="button"
                         className={customerWishlistStyles.buttonClass}
-                        onClick={() => void removeItem(item.productId)}
+                        onClick={() => void removeItem(item.productId, mutate)}
                       >
                         <Trash2 className={customerWishlistStyles.trashIcon} />
                         Remove

@@ -21,7 +21,7 @@ type CustomerProductDetailsSummaryProps = {
   setSelectedSize: (value: ProductSize) => void;
   toggleWishlist: () => Promise<void>;
   isWishlistActive: boolean;
-  onAddToCart: () => Promise<void>;
+  onAddToCart: () => void;
   allReviews: any[];
   onSubmitReview: () => void;
   review: number;

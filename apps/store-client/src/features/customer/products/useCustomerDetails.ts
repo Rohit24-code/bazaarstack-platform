@@ -1,47 +1,46 @@
-import { create } from "zustand"
+import { create } from "zustand";
 
-import { toast } from "sonner"
-import { getCoverImage } from "./productListShare"
-import {
-  addCustomerWishlist,
-  removeCustomerWishlistItem,
-} from "../wishlist/api"
-import { useCustomerWishlistStore } from "../wishlist/store"
-import { useCustomerCartAndCheckoutStore } from "../cartAndCheckout/store"
-import type { CustomerProduct, ProductSize } from "./types"
+import { toast } from "sonner";
+import { getCoverImage } from "./productListShare";
+
+import { useCustomerCartAndCheckoutStore } from "../cartAndCheckout/store";
+import type { CustomerProduct, ProductSize } from "./types";
 
 type CustomerProductDetailsStore = {
-  selectedImage: string
-  selectedColor: string
-  selectedSize: ProductSize | ""
-  review: number
-  reviewComment: string
-  setReview: (value: number) => void
-  setReviewComment: (value: string) => void
-  initProductState: (product: CustomerProduct) => void
-  clear: () => void
-  setSelectedImage: (value: string) => void
-  setSelectedColor: (value: string) => void
-  setSelectedSize: (value: ProductSize | "") => void
+  selectedImage: string;
+  selectedColor: string;
+  selectedSize: ProductSize | "";
+  review: number;
+  reviewComment: string;
+  setReview: (value: number) => void;
+  setReviewComment: (value: string) => void;
+  initProductState: (product: CustomerProduct) => void;
+  clear: () => void;
+  setSelectedImage: (value: string) => void;
+  setSelectedColor: (value: string) => void;
+  setSelectedSize: (value: ProductSize | "") => void;
   addToCart: (
     product: CustomerProduct,
     isLoaded: boolean,
     isBootstrapped: boolean,
-    isSignedIn: boolean
-  ) => Promise<void>
+    isSignedIn: boolean,
+    addCustomerCartItemMutate: any,
+  ) => void;
   toggleWishlist: (
     product: CustomerProduct,
     isLoaded: boolean,
     isBootstrapped: boolean,
     isSignedIn: boolean,
-    isWishlistActive: boolean
-  ) => Promise<void>
+    isWishlistActive: boolean,
+    addWishList: any,
+    deleteWishList: any,
+  ) => Promise<void>;
   submitReview: (
     productId: string | undefined,
     userId: string | undefined,
-    submitReviewMutate: any
-  ) => void
-}
+    submitReviewMutate: any,
+  ) => void;
+};
 
 const defaultState = {
   selectedImage: "",
@@ -49,7 +48,7 @@ const defaultState = {
   selectedSize: "" as ProductSize | "",
   review: 0,
   reviewComment: "",
-}
+};
 
 export const useCustomerProductDetailsStore =
   create<CustomerProductDetailsStore>((set, get) => ({
@@ -59,14 +58,14 @@ export const useCustomerProductDetailsStore =
         selectedImage: product ? getCoverImage(product) : "",
         selectedColor: product?.colors?.[0] || "",
         selectedSize: product?.sizes?.[0] || "",
-      })
+      });
     },
     clear: () => set(defaultState),
     setReview: (value: number) => {
-      set({ review: value })
+      set({ review: value });
     },
     setReviewComment: (value: string) => {
-      set({ reviewComment: value })
+      set({ reviewComment: value });
     },
     setSelectedImage: (value) => set({ selectedImage: value }),
     setSelectedColor: (value) => set({ selectedColor: value }),
@@ -76,62 +75,78 @@ export const useCustomerProductDetailsStore =
       isLoaded,
       isBootstrapped,
       isSignedIn,
-      isWishlistActive
+      isWishlistActive,
+      addWishList,
+      deleteWishList,
     ) => {
-      if (!product) return
+      if (!product) return;
 
       if (!isLoaded || !isBootstrapped || !isSignedIn) {
-        toast.error("Sign in to save")
-        return
+        toast.error("Sign in to save");
+        return;
       }
 
       try {
         if (isWishlistActive) {
-          const response = await removeCustomerWishlistItem(product?._id)
-          useCustomerWishlistStore.getState().setItems(response?.items ?? [])
-          toast.success("Removed")
-          return
+          deleteWishList(product?._id);
+
+          return;
         }
 
-        const response = await addCustomerWishlist({
+        addWishList({
           productId: product._id,
-        })
-        useCustomerWishlistStore.getState().setItems(response?.items ?? [])
-        toast.success("Saved")
+        });
       } catch {
-        toast.error("Failed to toggle wishlist items")
+        toast.error("Failed to toggle wishlist items");
       }
     },
-    addToCart: async (product, isLoaded, isBootatraped, isSignedIn) => {
-      const { selectedColor, selectedSize } = get()
+    addToCart: (
+      product,
+      isLoaded,
+      isBootstrapped,
+      isSignedIn,
+      addCustomerCartItemMutate,
+    ) => {
+      const { selectedColor, selectedSize } = get();
 
-      if (!product || product.stock < 1) return
+      if (!product || product.stock < 1) return;
 
-      if (!isLoaded || !isBootatraped) {
-        toast.error("Try again")
-        return
+      if (!isLoaded || !isBootstrapped) {
+        toast.error("Try again");
+        return;
       }
 
-      await useCustomerCartAndCheckoutStore.getState().addItem(
-        {
-          productId: product._id,
-          quantity: 1,
-          color: selectedColor || undefined,
-          size: selectedSize || undefined,
+      const itemPayload = {
+        productId: product._id,
+        quantity: 1,
+        color: selectedColor || undefined,
+        size: selectedSize || undefined,
+      };
+
+      const finalPrice = product.salePercentage
+        ? product.price - (product.price * product.salePercentage) / 100
+        : product.price;
+
+      if (isSignedIn) {
+        addCustomerCartItemMutate(itemPayload, {
+          onSuccess: () => toast.success("Added to cart"),
+          onError: () => toast.error("Failed to add in cart"),
+        });
+      } else {
+        useCustomerCartAndCheckoutStore.getState().addGuestItem({
+          ...itemPayload,
           title: product.title,
           brand: product.brand,
           image: getCoverImage(product),
-          finalPrice: product.salePercentage
-            ? product.price - (product.price * product.salePercentage) / 100
-            : product.price,
-        },
-        isSignedIn
-      )
+          finalPrice,
+        });
+        toast.success("Added to cart");
+      }
     },
     submitReview: (productId, userId, submitReviewMutate) => {
-      const { review, reviewComment, setReviewComment, setReview } = get()
+      const { review, reviewComment, setReviewComment, setReview } = get();
       if (!productId || !userId) return;
-      
+
       submitReviewMutate(
         {
           product: productId,
@@ -148,7 +163,7 @@ export const useCustomerProductDetailsStore =
           onError: () => {
             toast.error("Failed to submit review");
           },
-        }
+        },
       );
     },
-  }))
+  }));

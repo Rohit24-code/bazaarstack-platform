@@ -1,12 +1,5 @@
 import { create } from "zustand";
 import type { CustomerAddress, CustomerAddressFormValues } from "./types";
-import {
-  createCustomerAddresses,
-  deleteCustomerAddress,
-  getCustomerAddresses,
-  updateCustomerAddresses,
-} from "./api";
-import { toast } from "sonner";
 
 const emptyForm: CustomerAddressFormValues = {
   fullName: "",
@@ -20,13 +13,11 @@ type FormMode = "none" | "add" | "edit";
 
 type CustomerProfileStore = {
   isOpen: boolean;
-  items: CustomerAddress[];
   mode: FormMode;
   editingAddressId: string;
   form: CustomerAddressFormValues;
-  openProfile: () => Promise<void>;
+  openProfile: () => void;
   closeProfile: () => void;
-  loadAddresses: () => Promise<void>;
   startAdd: () => void;
   startEdit: (address: CustomerAddress) => void;
   updateForm: <K extends keyof CustomerAddressFormValues>(
@@ -34,22 +25,19 @@ type CustomerProfileStore = {
     value: CustomerAddressFormValues[K],
   ) => void;
   cancelForm: () => void;
-  saveForm: () => Promise<void>;
-  removeAddress: (addressId: string) => Promise<void>;
   clear: () => void;
+  saveForm: (createCustomer: any, updateCustomerAddress: any) => void;
+  removeAddress: (removeAddress: any, addressId: string) => void;
 };
 
 export const useCustomerProfileStore = create<CustomerProfileStore>(
-  (set, get) => ({
+  (set, get, createCustomer) => ({
     isOpen: false,
-    items: [],
     mode: "none",
     editingAddressId: "",
     form: emptyForm,
-    openProfile: async () => {
+    openProfile: () => {
       set({ isOpen: true });
-      // fetch the loadAddress method
-      await get().loadAddresses();
     },
     closeProfile: () => {
       set({
@@ -58,14 +46,6 @@ export const useCustomerProfileStore = create<CustomerProfileStore>(
         editingAddressId: "",
         form: emptyForm,
       });
-    },
-    loadAddresses: async () => {
-      try {
-        const response = await getCustomerAddresses();
-        set({ items: response?.items ?? [] });
-      } catch {
-        set({ items: [] });
-      }
     },
     startAdd: () => {
       set({
@@ -102,7 +82,7 @@ export const useCustomerProfileStore = create<CustomerProfileStore>(
         form: emptyForm,
       });
     },
-    saveForm: async () => {
+    saveForm: async (createCustomer: any, updateCustomerAddress: any) => {
       const { mode, editingAddressId, form } = get();
 
       const payload = {
@@ -112,29 +92,13 @@ export const useCustomerProfileStore = create<CustomerProfileStore>(
         postalCode: form.postalCode.trim(),
         isDefault: form.isDefault,
       };
-
-      try {
-        const response =
-          mode === "edit"
-            ? await updateCustomerAddresses(editingAddressId, payload)
-            : await createCustomerAddresses(payload);
-
-        set({
-          items: response?.items ?? [],
-          mode: "none",
-          editingAddressId: "",
-          form: emptyForm,
-        });
-
-        toast.success(mode === "edit" ? "Address updated" : "Address created");
-      } catch {
-        toast.error("Failed to add or update address");
-      }
+      mode === "edit"
+        ? updateCustomerAddress({ addressId: editingAddressId, body: payload })
+        : createCustomer(payload);
     },
-
-    removeAddress: async (addressId) => {
+    removeAddress: async (removeAddressfn, addressId) => {
       try {
-        const response = await deleteCustomerAddress(addressId);
+        const response = await removeAddressfn(addressId);
 
         set((state) => ({
           items: response?.items ?? [],
@@ -144,15 +108,14 @@ export const useCustomerProfileStore = create<CustomerProfileStore>(
           form: state.editingAddressId === addressId ? emptyForm : state.form,
         }));
 
-        toast.success("Address deleted successfully");
+        // toast.success("Address deleted successfully");
       } catch {
-        toast.error("Failed to delete address!");
+        // toast.error("Failed to delete address!");
       }
     },
     clear: () => {
       set({
         isOpen: false,
-        items: [],
         mode: "none",
         form: emptyForm,
         editingAddressId: "",

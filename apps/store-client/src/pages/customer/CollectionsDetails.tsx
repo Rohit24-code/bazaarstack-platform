@@ -16,7 +16,12 @@ import {
   usePostSingleReview,
   usePostReviewMutation,
 } from "@/features/customer/products/api/useCustomerProduct";
-import { toast } from "sonner";
+import { useAddCustomerCartItem } from "@/features/customer/cartAndCheckout/api/useCustomerCart";
+import {
+  useAddCustomerWishListQuery,
+  useCustomerWishListQuery,
+  useRemoveCustomerWishListQuery,
+} from "@/features/customer/wishlist/Hooks/useWishListApi";
 
 function CollectionDetails() {
   const { id = "" } = useParams();
@@ -27,6 +32,9 @@ function CollectionDetails() {
   const { data: productDetailsData, isLoading } = useCustomerProductDetails(id);
   const { data: allReviews = [] } = usePostSingleReview(id);
   const { mutate: submitReviewMutate } = usePostReviewMutation(id);
+  const { mutate: addCartItemMutate } = useAddCustomerCartItem();
+  const { mutate: addWishList } = useAddCustomerWishListQuery();
+  const { mutate: deleteWishList } = useRemoveCustomerWishListQuery();
 
   const {
     initProductState,
@@ -46,12 +54,12 @@ function CollectionDetails() {
     submitReview,
   } = useCustomerProductDetailsStore((state) => state);
 
-  const wishlistItems = useCustomerWishlistStore((state) => state.items);
+  const { data: wishlistItems } = useCustomerWishListQuery();
 
   const product = productDetailsData?.product ?? null;
   const relatedProducts = productDetailsData?.relatedProducts ?? [];
-  const isWishlistActive = !!product
-    ? wishlistItems.some((item) => item.productId === product._id)
+  const isWishlistActive: any = !!product
+    ? wishlistItems?.items?.some((item) => item.productId === product._id)
     : false;
 
   useEffect(() => {
@@ -116,6 +124,8 @@ function CollectionDetails() {
                 isBootStrapped,
                 Boolean(isSignedIn),
                 isWishlistActive,
+                addWishList,
+                deleteWishList,
               )
             }
             isWishlistActive={isWishlistActive}
@@ -125,10 +135,13 @@ function CollectionDetails() {
                 isLoaded,
                 isBootStrapped,
                 Boolean(isSignedIn),
+                addCartItemMutate,
               );
             }}
             allReviews={allReviews}
-            onSubmitReview={() => submitReview(id, user?.id, submitReviewMutate)}
+            onSubmitReview={() =>
+              submitReview(id, user?.id, submitReviewMutate)
+            }
             review={review}
             reviewComment={reviewComment}
             setReview={setReview}

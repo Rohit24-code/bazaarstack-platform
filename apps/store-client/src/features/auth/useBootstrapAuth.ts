@@ -1,12 +1,17 @@
 import { useAuth } from "@clerk/react"
 import { useAuthStore } from "./store"
 import { useEffect } from "react"
-import { getMe, syncUser } from "./api"
+import { getMe } from "./api"
 import { setApiTokenGetter } from "@/lib/api"
+import { useSyncUserMutation } from "./hooks/useAuthApi"
+import { useQueryClient } from "@tanstack/react-query"
 
 export function useBootStrapAuth() {
   const { isLoaded, isSignedIn, getToken } = useAuth()
   const { setLoading, setError, clearAuth, setUser } = useAuthStore()
+  
+  const { mutateAsync: syncUser } = useSyncUserMutation()
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     setApiTokenGetter(async () => {
@@ -27,7 +32,11 @@ export function useBootStrapAuth() {
       try {
         setLoading()
         await syncUser()
-        const data = await getMe()
+        
+        const data = await queryClient.fetchQuery({
+          queryKey: ["auth", "me"],
+          queryFn: () => getMe()
+        })
 
         setUser(data?.user)
       } catch (error) {
@@ -38,5 +47,5 @@ export function useBootStrapAuth() {
     }
 
     run()
-  }, [isLoaded, isSignedIn, clearAuth, setError, setLoading, setUser])
+  }, [isLoaded, isSignedIn, clearAuth, setError, setLoading, setUser, syncUser, queryClient])
 }

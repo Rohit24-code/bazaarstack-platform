@@ -1,309 +1,238 @@
-import {
-  Drawer,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "@ecom/ui-core";
-
-import { useEffect } from "react";
-import { useAuthStore } from "@/features/auth/store";
+import React, { useState } from "react";
 import { useAuth, useUser } from "@clerk/react";
-import { ScrollArea } from "@ecom/ui-core";
-import { Input } from "@ecom/ui-core";
-import { Button } from "@ecom/ui-core";
-import { formatPrice } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
-import { customerCartAndCheckoutDrawerStyles } from "../constants";
 import { useCustomerCartAndCheckoutStore } from "@/features/customer/cartAndCheckout/store";
-import CustomerCartItems from "./CustomerCartItems";
-
-function SummaryRow(props: { label: string; value: string | number }) {
-  return (
-    <div className={customerCartAndCheckoutDrawerStyles.rowClass}>
-      <span className="text-muted-foreground">{props.label}</span>
-      <span>{props.value}</span>
-    </div>
-  );
-}
+import { CustomerCartAndCheckoutDrawerView } from "./CustomerCartAndCheckoutDrawerView";
+import {
+  useGetCheckoutData,
+  useApplyCustomerPromo,
+  useCreateCheckoutSession,
+  usePayWithPointsCheckout,
+  useConfirmCheckout,
+} from "@/features/customer/cartAndCheckout/api/useCustomerCart";
+import { waitForRazorpay } from "@/features/customer/cartAndCheckout/razorpay";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 function CustomerCartAndCheckoutDrawer() {
-  const { isBootStrapped } = useAuthStore();
   const { isLoaded, isSignedIn } = useAuth();
   const { user } = useUser();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
   const {
     isOpen,
     setOpen,
-    loadCart,
-    selectedAddressId,
-    addresses,
+    guestCart,
     promoInput,
-    appliedPromo,
-    points,
-    promoLoading,
-    checkoutLoading,
-    pointsCheckoutLoading,
     setPromoInput,
-    clearPromo,
-    applyPromo,
-    startRazorpayCheckout,
-    startPointsCheckout,
-    loading,
-    cart,
+    appliedPromo,
+    setAppliedPromo,
+    clearPromoInput,
   } = useCustomerCartAndCheckoutStore((state) => state);
 
-  useEffect(() => {
-    if (!isOpen || !isLoaded || !isBootStrapped) return;
+  const {
+    data: checkoutData,
+    isLoading: isCheckoutDataLoading,
+  } = useGetCheckoutData(!!isSignedIn && isOpen);
 
-    loadCart(Boolean(isSignedIn));
-  }, [isBootStrapped, isLoaded, isOpen, isSignedIn, loadCart]);
+  const { mutate: applyPromoMutate, isPending: isPromoLoading } = useApplyCustomerPromo();
+  const { mutateAsync: createSessionMutate } = useCreateCheckoutSession();
+  const { mutateAsync: confirmCheckoutMutate } = useConfirmCheckout();
+  const { mutate: payWithPointsMutate, isPending: isPointsCheckoutLoading } = usePayWithPointsCheckout();
 
-  const selectedAddress =
-    addresses.find((item) => item._id === selectedAddressId) || null;
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+
+  const cart = isSignedIn ? checkoutData?.cart ?? { items: [], totalQuantity: 0 } : guestCart;
+  const addresses = isSignedIn ? checkoutData?.addresses?.items ?? [] : [];
+  const points = isSignedIn ? checkoutData?.points ?? 0 : 0;
+  
+  const selectedAddress = addresses.find((item) => item.isDefault) || addresses[0] || null;
 
   const subTotal = cart.items.reduce(
     (sum, item) => sum + item.finalPrice * item.quantity,
     0,
   );
 
-  const discountAmount = appliedPromo
-    ? Math.round((subTotal * appliedPromo.percentage) / 100)
-    : 0;
+  const handleApplyPromo = () => {
+    if (!promoInput.trim()) {
+      setAppliedPromo(null);
+      return;
+    }
 
-  const totalAmount = Math.max(subTotal - discountAmount, 0);
+    applyPromoMutate(
+      { code: promoInput.trim(), orderValue: subTotal },
+      {
+        onSuccess: (response) => {
+          if (!response?.code) {
+            setAppliedPromo(null);
+            return;
+          }
+          setAppliedPromo(response);
+          setPromoInput(response.code);
+          toast.success("Promo successfully applied");
+        },
+        onError: () => {
+          setAppliedPromo(null);
+          toast.error("Unable to apply promo");
+        },
+      }
+    );
+  };
+
+  const handleClearPromo = () => {
+    clearPromoInput();
+  };
+
+  const handleRazorpayCheckout = async () => {
+    if (!isSignedIn) {
+      toast.error("Sign in to checkout");
+      return;
+    }
+
+    if (!selectedAddress?._id) {
+      toast.error("Add a default address from profile section");
+      return;
+    }
+
+    if (!cart.items.length) {
+      toast.error("Your cart is empty");
+      return;
+    }
+
+    try {
+      setCheckoutLoading(true);
+
+      const session = await createSessionMutate({
+        addressId: selectedAddress._id,
+        promoCode: appliedPromo?.code || undefined,
+      });
+
+      if (
+        !session.razorpay?.keyId ||
+        !session.razorpay.orderId ||
+        !session.order._id
+      ) {
+        throw new Error("Invalid checkout session");
+      }
+
+      await waitForRazorpay();
+
+      if (!window.Razorpay) {
+        throw new Error("Razorpay not loaded");
+      }
+      const razorpay = new window.Razorpay({
+        key: session.razorpay.keyId,
+        amount: session.razorpay.amount,
+        currency: session.razorpay.currency,
+        order_id: session.razorpay.orderId,
+        name: "Bazaar Stack",
+        description: "Order payment",
+        prefill: { 
+          name: user?.fullName || "Customer", 
+          email: user?.primaryEmailAddress?.emailAddress || "" 
+        },
+        handler: async (response: any) => {
+          try {
+            const confirmed = await confirmCheckoutMutate({
+              orderId: session.order._id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+            });
+            if (!confirmed._id) {
+              throw new Error("Order confirmation failed");
+            }
+
+            setOpen(false);
+            clearPromoInput();
+            queryClient.invalidateQueries({ queryKey: ["customer", "cart"] });
+            queryClient.invalidateQueries({ queryKey: ["customer", "checkoutData"] });
+            toast.success("Payment successful");
+            navigate("/order-success");
+          } catch {
+            setCheckoutLoading(false);
+            toast.error("Payment confirmation failed");
+          }
+        },
+
+        modal: {
+          ondismiss: () => setCheckoutLoading(false),
+        },
+      });
+
+      razorpay.open();
+    } catch (error) {
+      console.error("CHECKOUT ERROR:", error);
+      setCheckoutLoading(false);
+      toast.error("Unable to start checkout");
+    }
+  };
+
+  const handlePointsCheckout = () => {
+    if (!isSignedIn) {
+      toast.error("Sign in to checkout");
+      return;
+    }
+
+    if (!selectedAddress?._id) {
+      toast.error("Add a default address from profile section");
+      return;
+    }
+
+    if (!cart.items.length) {
+      toast.error("Your cart is empty");
+      return;
+    }
+
+    payWithPointsMutate(
+      {
+        addressId: selectedAddress._id,
+        promoCode: appliedPromo?.code || undefined,
+      },
+      {
+        onSuccess: (response) => {
+          if (!response._id) {
+            toast.error("Unable to place order");
+            return;
+          }
+
+          setOpen(false);
+          clearPromoInput();
+          queryClient.invalidateQueries({ queryKey: ["customer", "cart"] });
+          queryClient.invalidateQueries({ queryKey: ["customer", "checkoutData"] });
+          toast.success("Order placed");
+          navigate("/order-success");
+        },
+        onError: () => {
+          toast.error("Failed to place order with points");
+        },
+      }
+    );
+  };
+
+  if (!isLoaded) return null;
 
   return (
-    <Drawer open={isOpen} onOpenChange={setOpen}>
-      <DrawerContent
-        className={customerCartAndCheckoutDrawerStyles.contentClass}
-      >
-        <div className={customerCartAndCheckoutDrawerStyles.shellClass}>
-          <div className={customerCartAndCheckoutDrawerStyles.leftPaneClass}>
-            <CustomerCartItems />
-          </div>
-          <aside className={customerCartAndCheckoutDrawerStyles.rightPaneClass}>
-            <div
-              className={customerCartAndCheckoutDrawerStyles.rightInnerClass}
-            >
-              <div className={customerCartAndCheckoutDrawerStyles.panelClass}>
-                <DrawerHeader
-                  className={
-                    customerCartAndCheckoutDrawerStyles.panelHeaderClass
-                  }
-                >
-                  <DrawerTitle
-                    className={
-                      customerCartAndCheckoutDrawerStyles.panelTitleClass
-                    }
-                  >
-                    Checkout
-                  </DrawerTitle>
-                </DrawerHeader>
-
-                {isSignedIn ? (
-                  <>
-                    <ScrollArea
-                      className={
-                        customerCartAndCheckoutDrawerStyles.scrollClass
-                      }
-                    >
-                      <div
-                        className={
-                          customerCartAndCheckoutDrawerStyles.bodyClass
-                        }
-                      >
-                        <section className="space-y-2">
-                          <p
-                            className={
-                              customerCartAndCheckoutDrawerStyles.sectionTitleClass
-                            }
-                          >
-                            Default Address
-                          </p>
-
-                          {selectedAddress ? (
-                            <div
-                              className={
-                                customerCartAndCheckoutDrawerStyles.cardClass
-                              }
-                            >
-                              <p
-                                className={
-                                  customerCartAndCheckoutDrawerStyles.helperClass
-                                }
-                              >
-                                {selectedAddress.fullName}
-                              </p>
-                              <p
-                                className={
-                                  customerCartAndCheckoutDrawerStyles.helperClass
-                                }
-                              >
-                                {selectedAddress.address}
-                                {selectedAddress.state}
-                              </p>
-                              <p
-                                className={
-                                  customerCartAndCheckoutDrawerStyles.helperClass
-                                }
-                              >
-                                {selectedAddress.postalCode}
-                              </p>
-                            </div>
-                          ) : (
-                            <p>
-                              No default address present. Add one from profile
-                              dialog
-                            </p>
-                          )}
-                        </section>
-
-                        <section className="space-y-2">
-                          <p
-                            className={
-                              customerCartAndCheckoutDrawerStyles.promoTitle
-                            }
-                          >
-                            Promo Code
-                          </p>
-                          {!appliedPromo ? (
-                            <div
-                              className={
-                                customerCartAndCheckoutDrawerStyles.promoRowClass
-                              }
-                            >
-                              <Input
-                                value={promoInput}
-                                onChange={(event) =>
-                                  setPromoInput(event.target.value)
-                                }
-                                placeholder="Enter Promo Code"
-                                className={
-                                  customerCartAndCheckoutDrawerStyles.promoInputClass
-                                }
-                              />
-                              <Button
-                                type="button"
-                                variant={"default"}
-                                onClick={() => void applyPromo()}
-                                disabled={promoLoading || !promoInput.trim()}
-                              >
-                                {promoLoading ? "Applying..." : "Apply"}
-                              </Button>
-                            </div>
-                          ) : (
-                            <div>
-                              <span>
-                                {appliedPromo.code} ({appliedPromo.percentage}%)
-                              </span>
-                              <Button
-                                type="button"
-                                variant={"default"}
-                                onClick={clearPromo}
-                              >
-                                Remove
-                              </Button>
-                            </div>
-                          )}
-                        </section>
-                        <SummaryRow label="Items" value={cart.totalQuantity} />
-                        <SummaryRow label="Subtotal" value={subTotal} />
-                        <SummaryRow
-                          label="Discount"
-                          value={formatPrice(discountAmount)}
-                        />
-                        <SummaryRow label="Points" value={points} />
-                        <div
-                          className={
-                            customerCartAndCheckoutDrawerStyles.totalRowClass
-                          }
-                        >
-                          <span>Total</span>
-                          <span>{formatPrice(totalAmount)}</span>
-                        </div>
-                      </div>
-                    </ScrollArea>
-
-                    <DrawerFooter
-                      className={
-                        customerCartAndCheckoutDrawerStyles.actionClass
-                      }
-                    >
-                      <Button
-                        onClick={() => {
-                          void setOpen(false);
-                          void startRazorpayCheckout({
-                            isSignedIn: Boolean(isSignedIn),
-                            name: user?.fullName || "Customer",
-                            email:
-                              user?.primaryEmailAddress?.emailAddress || "",
-                            onSuccess: () => navigate("/order-success"),
-                          });
-                        }}
-                        type="button"
-                        className={
-                          customerCartAndCheckoutDrawerStyles.primaryButtonClass
-                        }
-                        disabled={
-                          loading ||
-                          !cart.items.length ||
-                          !selectedAddressId ||
-                          checkoutLoading ||
-                          pointsCheckoutLoading
-                        }
-                      >
-                        {checkoutLoading
-                          ? "Processing..."
-                          : "Pay with Razorpay"}
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          void startPointsCheckout({
-                            isSignedIn: Boolean(isSignedIn),
-                            onSuccess: () => navigate("/order-success"),
-                          });
-                        }}
-                        disabled={
-                          !(
-                            Boolean(isSignedIn) &&
-                            Boolean(selectedAddressId) &&
-                            Boolean(cart.items.length) &&
-                            points >= totalAmount &&
-                            !checkoutLoading &&
-                            !pointsCheckoutLoading
-                          )
-                        }
-                        type="button"
-                        className={
-                          customerCartAndCheckoutDrawerStyles.primaryButtonClass
-                        }
-                      >
-                        {pointsCheckoutLoading
-                          ? "Processing..."
-                          : "Pay with Points"}
-                      </Button>
-                    </DrawerFooter>
-                  </>
-                ) : (
-                  <div
-                    className={customerCartAndCheckoutDrawerStyles.bodyClass}
-                  >
-                    <div
-                      className={
-                        customerCartAndCheckoutDrawerStyles.infoBoxClass
-                      }
-                    >
-                      Sign in to continue to checkout
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </aside>
-        </div>
-      </DrawerContent>
-    </Drawer>
+    <CustomerCartAndCheckoutDrawerView
+      isOpen={isOpen}
+      setOpen={setOpen}
+      isSignedIn={!!isSignedIn}
+      cart={cart}
+      addresses={addresses}
+      points={points}
+      promoInput={promoInput}
+      setPromoInput={setPromoInput}
+      appliedPromo={appliedPromo}
+      promoLoading={isPromoLoading}
+      checkoutLoading={checkoutLoading}
+      pointsCheckoutLoading={isPointsCheckoutLoading}
+      loading={isCheckoutDataLoading}
+      onApplyPromo={handleApplyPromo}
+      onClearPromo={handleClearPromo}
+      onRazorpayCheckout={handleRazorpayCheckout}
+      onPointsCheckout={handlePointsCheckout}
+    />
   );
 }
 

@@ -23,6 +23,7 @@ import { useCustomerWishlistStore } from "@/features/customer/wishlist/store";
 import { useEffect } from "react";
 import { useAuth } from "@clerk/react";
 import { useAuthStore } from "@/features/auth/store";
+import { useCustomerWishListQuery } from "@/features/customer/wishlist/Hooks/useWishListApi";
 
 type Props = {
   isSignedIn: boolean;
@@ -35,13 +36,9 @@ const CustomerMobileNavbar = ({ isSignedIn }: Props) => {
 
   const { signOut, isLoaded } = useAuth();
   const { isBootStrapped } = useAuthStore();
-
-  const {
-    items: wishlistItems,
-    loadWishlist,
-    clear: clearWishlist,
-    setOpen: setWishListOpen,
-  } = useCustomerWishlistStore((state) => state);
+  const { data: wishlistItems } = useCustomerWishListQuery();
+  const { clear: clearWishlist, setOpen: setWishListOpen } =
+    useCustomerWishlistStore((state) => state);
 
   useEffect(() => {
     if (!isLoaded || !isBootStrapped) return;
@@ -50,18 +47,10 @@ const CustomerMobileNavbar = ({ isSignedIn }: Props) => {
       clearWishlist();
       return;
     }
-
-    loadWishlist();
-  }, [
-    clearWishlist,
-    isBootStrapped,
-    isSignedIn,
-    loadWishlist,
-    setWishListOpen,
-  ]);
+  }, [clearWishlist, isBootStrapped, isSignedIn, setWishListOpen]);
 
   const showSignInUi = isLoaded && isBootStrapped && isSignedIn;
-  const wishListCount = wishlistItems.length;
+  const wishListCount = wishlistItems?.items?.length;
 
   return (
     <div className={mobileNavStyles?.mobileWrap}>
