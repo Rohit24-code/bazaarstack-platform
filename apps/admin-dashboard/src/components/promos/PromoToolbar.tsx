@@ -1,11 +1,11 @@
-import { promoToolbarStyles } from "@/pages/admin/constants"
-import { Button } from "@ecom/ui-core"
-import { Input } from "@ecom/ui-core"
-import { Plus, Search } from "lucide-react"
-import { useAdminPromoStore } from "@/features/admin/Promo/useAdminPromStore"
+import { useAdminPromoUiStore } from "@/features/admin/Promo/useAdminPromStore";
+import { promoToolbarStyles } from "@/pages/admin/constants";
+import { Button } from "@ecom/ui-core";
+import { Input } from "@ecom/ui-core";
+import { Plus, Search } from "lucide-react";
 
 const PromoToolbar = () => {
-  const { search, setSearch, onAddPromo } = useAdminPromoStore()
+  const { search, setSearch, onAddPromo } = useAdminPromoUiStore();
   return (
     <div className={promoToolbarStyles.wrapClass}>
       <div className={promoToolbarStyles.searchWrapClass}>
@@ -26,7 +26,7 @@ const PromoToolbar = () => {
         Add promo
       </Button>
     </div>
-  )
-}
+  );
+};
 
-export default PromoToolbar
+export default PromoToolbar;

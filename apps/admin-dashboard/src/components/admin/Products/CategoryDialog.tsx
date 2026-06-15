@@ -7,46 +7,59 @@ import {
 } from "@ecom/ui-core";
 import { Input } from "@ecom/ui-core";
 import { Separator } from "@ecom/ui-core";
-import {
-  createAdminCategory,
-  updateAdminCategory,
-} from "@/features/admin/products/api";
 import type { Category } from "@/features/admin/products/types";
-import { Pencil, Tag } from "lucide-react";
-import { use, useState } from "react";
+import { Pencil, Tag, Loader2 } from "lucide-react";
+import { useState } from "react";
 import { categoryStyles } from "./constants";
 import { useProductStore } from "@/features/admin/products/store";
+import {
+  useCreateAdminCategory,
+  useGetAdminCategories,
+  useUpdateAdminCategory,
+} from "@/features/admin/products/hooks/useProductApi";
 
 export function CategoryDialog() {
   const [name, setName] = useState("");
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [saving, setSaving] = useState(false);
 
-  const {
-    categoryDialogOpen: open,
-    setCategoryDialogOpen: onOpenChange,
-    refreshAll,
-  } = useProductStore();
+  const { categoryDialogOpen: open, setCategoryDialogOpen: onOpenChange } =
+    useProductStore();
 
-  const { categories } = useProductStore();
+  const { data: categories = [], isLoading } = useGetAdminCategories();
 
-  async function handleSave() {
-    if (!name.trim()) return;
+  const createCategoryMutation = useCreateAdminCategory();
+  const updateCategoryMutation = useUpdateAdminCategory();
 
-    try {
-      setSaving(true);
+  const isSaving =
+    createCategoryMutation.isPending || updateCategoryMutation.isPending;
 
-      if (editingCategory) {
-        await updateAdminCategory(editingCategory._id, { name: name.trim() });
-      } else {
-        await createAdminCategory({ name: name.trim() });
-      }
+  function handleSave() {
+    if (!name.trim() || isSaving) return;
 
-      setName("");
-      setEditingCategory(null);
-      await refreshAll();
-    } finally {
-      setSaving(false);
+    const trimmedName = name.trim();
+
+    if (editingCategory) {
+      updateCategoryMutation.mutate(
+        {
+          categoryId: editingCategory._id,
+          body: { name: trimmedName },
+        },
+        {
+          onSuccess: () => {
+            setName("");
+            setEditingCategory(null);
+          },
+        },
+      );
+    } else {
+      createCategoryMutation.mutate(
+        { name: trimmedName },
+        {
+          onSuccess: () => {
+            setName("");
+          },
+        },
+      );
     }
   }
 
@@ -60,7 +73,6 @@ export function CategoryDialog() {
       setName("");
       setEditingCategory(null);
     }
-
     onOpenChange(nextOpen);
   }
 
@@ -68,7 +80,7 @@ export function CategoryDialog() {
     <Dialog open={open} onOpenChange={handleToggle}>
       <DialogContent className={categoryStyles.dialogContentClass}>
         <DialogHeader>
-          <DialogTitle>Manage Catgories</DialogTitle>
+          <DialogTitle>Manage Categories</DialogTitle>
         </DialogHeader>
 
         <div className={categoryStyles.contentWrap}>
@@ -77,8 +89,10 @@ export function CategoryDialog() {
               value={name}
               onChange={(event) => setName(event.target.value)}
               placeholder="Enter category name you want to add!!!"
+              disabled={isSaving}
             />
-            <Button onClick={handleSave} disabled={saving || !name.trim()}>
+            <Button onClick={handleSave} disabled={isSaving || !name.trim()}>
+              {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {editingCategory ? "Update" : "Add"}
             </Button>
           </div>
@@ -86,25 +100,37 @@ export function CategoryDialog() {
           <Separator />
 
           <div className={categoryStyles.categoriesList}>
-            {categories.map((cat) => (
-              <div key={cat._id} className={categoryStyles.categoryRow}>
-                <div className={categoryStyles.categoryInfo}>
-                  <Tag className={categoryStyles.categoryIcon} />
-                  <span className={categoryStyles.categoryName}>
-                    {cat.name}
-                  </span>
-                </div>
-
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => handleEdit(cat)}
-                >
-                  <Pencil className={categoryStyles.editButtonClass} />
-                </Button>
+            {isLoading ? (
+              <div className="flex items-center justify-center py-6 gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Fetching operational categories...</span>
               </div>
-            ))}
+            ) : categories?.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                No categories active.
+              </p>
+            ) : (
+              categories?.map((cat) => (
+                <div key={cat._id} className={categoryStyles.categoryRow}>
+                  <div className={categoryStyles.categoryInfo}>
+                    <Tag className={categoryStyles.categoryIcon} />
+                    <span className={categoryStyles.categoryName}>
+                      {cat.name}
+                    </span>
+                  </div>
+
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => handleEdit(cat)}
+                    disabled={isSaving}
+                  >
+                    <Pencil className={categoryStyles.editButtonClass} />
+                  </Button>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </DialogContent>

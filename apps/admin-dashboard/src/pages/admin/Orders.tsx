@@ -1,70 +1,83 @@
-import Loader from "@/components/common/Loader"
-import { Badge } from "@ecom/ui-core"
-import { Card, CardContent, CardHeader, CardTitle } from "@ecom/ui-core"
+import Loader from "@/components/common/Loader";
+import { Badge } from "@ecom/ui-core";
+import { Card, CardContent, CardHeader, CardTitle } from "@ecom/ui-core";
 import {
   SelectTrigger,
   SelectValue,
   Select,
   SelectContent,
   SelectItem,
-} from "@ecom/ui-core"
-import { DataTable, type ColumnDef } from "@ecom/ui-core"
-import { useAdminOrdersStore } from "@/features/admin/orders/store"
+} from "@ecom/ui-core";
+import { DataTable, type ColumnDef } from "@ecom/ui-core";
 import type {
   AdminOrder,
   AdminOrderStatus,
   AdminPaymentStatus,
-} from "@/features/admin/orders/types"
-import { formatPrice } from "@/lib/utils"
-import { useEffect } from "react"
-import { orderStyles } from "./constants"
+} from "@/features/admin/orders/types";
+import { formatPrice } from "@/lib/utils";
+import { useEffect } from "react";
+import { orderStyles } from "./constants";
+import {
+  useExtractAdminOrderApi,
+  useUpdateAdminOrderStatusApi,
+} from "@/features/admin/orders/hooks/useOrderDashboard";
 
 const orderStatusOptions: AdminOrderStatus[] = [
   "placed",
   "shipped",
   "delivered",
-]
+];
 
 function formatDate(value?: string | null) {
-  return value ? new Date(value).toLocaleDateString() : "-"
+  return value ? new Date(value).toLocaleDateString() : "-";
 }
 
 function AdminPaymentStatusBadge(props: { status: AdminPaymentStatus }) {
-  const { status } = props
+  const { status } = props;
   const className =
     status === "paid"
       ? orderStyles.successBadgeClass
       : status === "failed"
         ? orderStyles.dangerBadgeClass
-        : orderStyles.neutralBadgeClass
+        : orderStyles.neutralBadgeClass;
 
-  return <Badge className={className}>{status}</Badge>
+  return <Badge className={className}>{status}</Badge>;
 }
 
 function canUpdateStatus(order: AdminOrder) {
-  if (order.paymentStatus !== "paid") return false
-  if (order.orderStatus === "delivered") return false
-  if (order.orderStatus === "returned") return false
+  if (order.paymentStatus !== "paid") return false;
+  if (order.orderStatus === "delivered") return false;
+  if (order.orderStatus === "returned") return false;
 
-  return true
+  return true;
 }
 
 function getNextStatusValue(order: AdminOrder) {
   if (order.orderStatus === "delivered" || order.orderStatus === "returned")
-    return ""
+    return "";
 
-  return order.orderStatus
+  return order.orderStatus;
 }
 
 function AdminOrders() {
-  const { loading, orders, updatingOrderId, fetchOrders, changeStatus } =
-    useAdminOrdersStore((state) => state)
+  // const { loading, orders, updatingOrderId, fetchOrders, changeStatus } =
+  //   useAdminOrdersStore((state) => state);
 
-  useEffect(() => {
-    void fetchOrders()
-  }, [fetchOrders])
+  const { isLoading: adminLoading, data } = useExtractAdminOrderApi();
 
-  if (loading) return <Loader />
+  const orders = data?.items || [];
+
+  const {
+    isPending: adminPending,
+    mutate: changeStatus,
+    variables,
+  } = useUpdateAdminOrderStatusApi();
+
+  const loading = adminLoading || adminPending;
+
+  const currentUpdatingId = adminPending ? variables?.orderId : "";
+
+  if (loading) return <Loader />;
 
   const columns: ColumnDef<AdminOrder>[] = [
     {
@@ -97,14 +110,17 @@ function AdminOrders() {
       headerClassName: "text-right",
       cellClassName: "text-right",
       render: (row) => {
-        const canUpdate = canUpdateStatus(row)
+        const canUpdate = canUpdateStatus(row);
         return canUpdate ? (
           <Select
             value={getNextStatusValue(row)}
             onValueChange={(value) =>
-              void changeStatus(row._id, value as AdminOrderStatus)
+              void changeStatus({
+                orderId: row._id,
+                orderStatus: value as AdminOrderStatus,
+              })
             }
-            disabled={updatingOrderId === row._id}
+            disabled={currentUpdatingId === row._id}
           >
             <SelectTrigger className={orderStyles.selectTriggerClass}>
               <SelectValue placeholder="Update Status" />
@@ -129,10 +145,10 @@ function AdminOrders() {
                 ? "Returned"
                 : "Completed"}
           </span>
-        )
+        );
       },
     },
-  ]
+  ];
 
   return (
     <div className={orderStyles.pageWrapClass}>
@@ -156,7 +172,7 @@ function AdminOrders() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
 
-export default AdminOrders
+export default AdminOrders;

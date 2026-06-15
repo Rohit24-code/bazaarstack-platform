@@ -26,3 +26,8 @@ export type AdminUpdateOrderStatusResponse = {
   deliveredAt?: string | null;
   returnedAt?: string | null;
 };
+
+export type UpdateOrderStatusVariables = {
+  orderId: string;
+  orderStatus: AdminOrderStatus;
+};

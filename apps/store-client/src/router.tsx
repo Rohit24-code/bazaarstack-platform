@@ -6,6 +6,7 @@ import CollectionsDetails from "./pages/customer/CollectionsDetails";
 import CustomerOrderSuccessPage from "./pages/customer/OrderSuccess";
 import CustomerProfile from "./pages/customer/Profile";
 import ProtectedLayout from "./components/auth/ProtectedLayout";
+import { SignInPage } from "./pages/auth/SignInPage";
 
 export const storeRouter = createBrowserRouter([
   {
@@ -14,6 +15,7 @@ export const storeRouter = createBrowserRouter([
     children: [
       { index: true, element: <StoreHome /> },
       { path: "collections", element: <Collections /> },
+      { path: "sign-in", element: <SignInPage /> },
       { path: "collection/:id", element: <CollectionsDetails /> },
       { path: "order-success", element: <CustomerOrderSuccessPage /> },
       {

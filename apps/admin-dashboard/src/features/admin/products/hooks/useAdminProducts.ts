@@ -1,18 +1,28 @@
-import { useEffect } from "react"
-import { useProductStore } from "../store"
+import { useEffect } from "react";
+
+import { useQueryClient } from "@tanstack/react-query";
+import { useProductStore } from "../store";
+import { useGetAdminCategories } from "./useProductApi";
+import { getAdminProducts } from "../api";
 
 export function useAdminProducts() {
-  const { search, fetchCategories, fetchProducts } = useProductStore()
+  const { search, page, limit } = useProductStore();
+  const queryClient = useQueryClient();
+
+  const offset = (page - 1) * limit;
+
+  useGetAdminCategories();
 
   useEffect(() => {
-    fetchCategories()
-  }, [fetchCategories])
+    if (!search.trim()) return;
 
-  useEffect(() => {
     const timer = setTimeout(() => {
-      fetchProducts(search)
-    }, 250)
+      queryClient.prefetchQuery({
+        queryKey: ["admin", "products", { search, limit, offset }],
+        queryFn: () => getAdminProducts(search, limit, offset),
+      });
+    }, 250);
 
-    return () => clearTimeout(timer)
-  }, [search, fetchProducts])
+    return () => clearTimeout(timer);
+  }, [search, limit, offset, queryClient]);
 }

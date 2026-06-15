@@ -1,8 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
-// @ts-ignore: side-effect import for CSS module declaration
-import "./index.css";
+import "@ecom/ui-core/src/index.css";
 
 import { ClerkProvider } from "@clerk/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -18,7 +17,9 @@ const queryClient = new QueryClient({
   },
 });
 
-const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || "pk_test_YWN0dWFsLWFpcmVkYWxlLTQuY2xlcmsuYWNjb3VudHMuZGV2JA";
+const clerkPubKey =
+  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY ||
+  "pk_test_YWN0dWFsLWFpcmVkYWxlLTQuY2xlcmsuYWNjb3VudHMuZGV2JA";
 
 if (!clerkPubKey) {
   console.error("Missing Publishable Key");

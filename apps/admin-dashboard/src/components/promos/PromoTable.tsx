@@ -1,11 +1,11 @@
-import { promoTableStyles } from "@/pages/admin/constants"
-import React, { useState } from "react"
-import { formatDateTime } from "@/lib/functions"
-import { Button } from "@ecom/ui-core"
-import { Pencil, Trash2 } from "lucide-react"
-import { useAdminPromoStore } from "@/features/admin/Promo/useAdminPromStore"
-import type { Promo } from "@/features/admin/Promo/types"
-import { DataTable, type ColumnDef } from "@ecom/ui-core"
+import { promoTableStyles } from "@/pages/admin/constants";
+import React, { useState } from "react";
+import { formatDateTime } from "@/lib/functions";
+import { Button } from "@ecom/ui-core";
+import { Pencil, Trash2 } from "lucide-react";
+
+import type { Promo } from "@/features/admin/Promo/types";
+import { DataTable, type ColumnDef } from "@ecom/ui-core";
 import {
   Dialog,
   DialogContent,
@@ -13,12 +13,18 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@ecom/ui-core"
+} from "@ecom/ui-core";
+import { useAdminPromoUiStore } from "@/features/admin/Promo/useAdminPromStore";
+import {
+  useDeleteAdminPromo,
+  useGetAdminPromos,
+} from "@/features/admin/Promo/hooks/useAdminPromo";
 
 const usePromoColumns = (
-  onDeleteClick: (id: string) => void
+  onDeleteClick: (id: string) => void,
+  isDeleting: boolean,
 ): ColumnDef<Promo>[] => {
-  const { deletingPromoId, onEditPromoDialog } = useAdminPromoStore()
+  const { onEditPromoDialog } = useAdminPromoUiStore();
 
   return [
     {
@@ -71,7 +77,7 @@ const usePromoColumns = (
             size={"icon"}
             variant={"ghost"}
             className={promoTableStyles.deleteButtonClass}
-            disabled={deletingPromoId === promo._id}
+            disabled={isDeleting}
             onClick={() => onDeleteClick(promo._id)}
           >
             <Trash2 className="h-4 w-4" />
@@ -79,22 +85,29 @@ const usePromoColumns = (
         </div>
       ),
     },
-  ]
-}
+  ];
+};
 
 const PromoTable = () => {
-  const { promos, loading, removePromo, deletingPromoId } = useAdminPromoStore()
-  const [promoToDelete, setPromoToDelete] = useState<string | null>(null)
+  const { data: response, isLoading: loading } = useGetAdminPromos();
+  const deletePromoMutation = useDeleteAdminPromo();
 
-  // Pass the state setter into the columns so the Trash button can trigger the modal
-  const columns = usePromoColumns(setPromoToDelete)
+  const [promoToDelete, setPromoToDelete] = useState<string | null>(null);
+
+  const promos = response?.items ?? [];
+  const isDeleting = deletePromoMutation.isPending;
+
+  const columns = usePromoColumns(setPromoToDelete, isDeleting);
 
   const handleConfirmDelete = () => {
     if (promoToDelete) {
-      removePromo(promoToDelete)
-      setPromoToDelete(null) // Close the modal immediately after confirming
+      deletePromoMutation.mutate(promoToDelete, {
+        onSuccess: () => {
+          setPromoToDelete(null);
+        },
+      });
     }
-  }
+  };
 
   return (
     <>
@@ -109,7 +122,7 @@ const PromoTable = () => {
 
       <Dialog
         open={!!promoToDelete}
-        onOpenChange={(open) => !open && setPromoToDelete(null)}
+        onOpenChange={(open) => !open && !isDeleting && setPromoToDelete(null)}
       >
         <DialogContent>
           <DialogHeader>
@@ -123,22 +136,22 @@ const PromoTable = () => {
             <Button
               variant="outline"
               onClick={() => setPromoToDelete(null)}
-              disabled={!!deletingPromoId}
+              disabled={isDeleting}
             >
               Cancel
             </Button>
             <Button
               variant="destructive"
               onClick={handleConfirmDelete}
-              disabled={!!deletingPromoId}
+              disabled={isDeleting}
             >
-              Delete
+              {isDeleting ? "Deleting..." : "Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
-  )
-}
+  );
+};
 
-export default PromoTable
+export default PromoTable;

@@ -1,11 +1,13 @@
 import { tableStyles } from "./constants";
 import { getCoverImage } from "@/features/admin/products/hooks/useProductForm";
-import { useProductStore } from "@/features/admin/products/store";
+
 import { DataTable, type ColumnDef } from "@ecom/ui-core";
 import type { Product } from "@/features/admin/products/types";
 import { Badge } from "@ecom/ui-core";
 import { Button } from "@ecom/ui-core";
 import { Pencil } from "lucide-react";
+import { useProductStore } from "@/features/admin/products/store";
+import { useGetAdminProducts } from "@/features/admin/products/hooks/useProductApi";
 
 const useProductColumns = (): ColumnDef<Product>[] => {
   const { openEditDialog: onEdit } = useProductStore();
@@ -74,8 +76,19 @@ const useProductColumns = (): ColumnDef<Product>[] => {
 };
 
 export function ProductTable() {
-  const { products, loading, page, limit, totalCount, setPage } =
-    useProductStore();
+  const { page, limit, search, setPage } = useProductStore();
+
+  const offset = (page - 1) * limit;
+
+  const { data: response, isLoading: loading } = useGetAdminProducts(
+    search,
+    limit,
+    offset,
+  );
+
+  const products = response?.data ?? [];
+  const totalCount = response?.totalCount ?? 0;
+
   const columns = useProductColumns();
   const totalPages = Math.ceil(totalCount / limit);
 

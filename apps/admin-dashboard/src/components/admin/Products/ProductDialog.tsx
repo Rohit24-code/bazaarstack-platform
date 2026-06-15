@@ -1,5 +1,5 @@
-import { useForm } from "react-hook-form"; // 🚀 Base form contextual manager
-import { FormContainer, FormField } from "@ecom/ui-core"; // 🚀 Context mapping containers
+import { useForm } from "react-hook-form";
+import { FormContainer } from "@ecom/ui-core";
 
 import {
   Dialog,
@@ -19,36 +19,24 @@ import {
 } from "@ecom/ui-core";
 import { Textarea } from "@ecom/ui-core";
 import { BRANDS } from "@/features/admin/products/constants";
-import type {
-  Category,
-  Product,
-  ProductStatus,
-} from "@/features/admin/products/types";
+import type { ProductStatus } from "@/features/admin/products/types";
 import { Button } from "@ecom/ui-core";
 
 import { productDialogStyles } from "./constants";
-import { useProductStore } from "@/features/admin/products/store";
+
 import { useProductForm } from "@/features/admin/products/hooks/useProductForm";
 import { ColorPicker } from "./ColorPicker";
 import { SizeSelector } from "./SizePicker";
 import { ImagePicker } from "./ImagePicker";
 import { Checkbox } from "@ecom/ui-core";
-import {
-  Field,
-  FieldContent,
-  FieldDescription,
-  FieldLabel,
-  FieldTitle,
-} from "@ecom/ui-core";
-import { FormItem } from "@ecom/ui-core/src/components/ui/form";
+import { useProductStore } from "@/features/admin/products/store";
+import { useGetAdminCategories } from "@/features/admin/products/hooks/useProductApi";
 
 export function ProductDialog() {
-  const {
-    categories,
-    productDialogOpen,
-    setProductDialogToogle,
-    editingProduct,
-  } = useProductStore();
+  const { productDialogOpen, setProductDialogToogle, editingProduct } =
+    useProductStore();
+
+  const { data: categories = [] } = useGetAdminCategories();
 
   const {
     form,
@@ -65,7 +53,6 @@ export function ProductDialog() {
     changeCoverImage,
   } = useProductForm({ product: editingProduct });
 
-  // 🚀 Initialize the ghost validation bridge to feed state downward into design tokens
   const methods = useForm({
     values: form,
   });
@@ -82,7 +69,6 @@ export function ProductDialog() {
           </DialogTitle>
         </DialogHeader>
 
-        {/* 🚀 Encapsulate the block inside the main provider state engine wrapper */}
         <FormContainer {...methods}>
           <div className={productDialogStyles.contentWrapClass}>
             <div className={productDialogStyles.twoColumnGridClass}>
@@ -273,7 +259,6 @@ export function ProductDialog() {
                   Featured State
                 </Label>
                 <div className="my-auto flex items-start space-x-3 rounded-md border p-4 bg-card">
-                  {/* 🚀 Bypasses all strict hooks and relies completely on your custom hook logic */}
                   <Checkbox
                     checked={form.isFeatured}
                     onCheckedChange={(e) =>

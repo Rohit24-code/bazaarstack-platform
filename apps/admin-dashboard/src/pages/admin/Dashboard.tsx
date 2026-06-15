@@ -1,11 +1,6 @@
 import Loader from "@/components/common/Loader";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@ecom/ui-core";
-import { useAdminDashboardLiteStore } from "@/features/admin/dashboard/store";
+import { Card, CardContent, CardHeader, CardTitle } from "@ecom/ui-core";
+
 import { formatPrice } from "@/lib/utils";
 import {
   Boxes,
@@ -15,6 +10,8 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { useEffect } from "react";
+import { AdminDashboardLite } from "@/features/admin/dashboard/types";
+import { useDashboardApi } from "@/features/admin/dashboard/hooks/useDashboardApi";
 
 const statsItems = [
   {
@@ -44,6 +41,14 @@ const statsItems = [
   },
 ] as const;
 
+const fallbackStats: AdminDashboardLite = {
+  totalProducts: 0,
+  totalCategories: 0,
+  totalSales: 0,
+  totalOrders: 0,
+  totalReturnedOrders: 0,
+};
+
 const pageWrapClass = "min-h-screen bg-background";
 const contentWrapClass = "mx-auto max-w-6xl px-4 py-8";
 const headerCardClass = "border-border bg-card";
@@ -63,14 +68,7 @@ const statLabelClass = "text-sm text-muted-foreground";
 const statValueClass = "mt-1 text-2xl font-semibold text-foreground";
 
 function AdminDashboard() {
-  const { loading, fetchDashboard, stats, hasLoaded } =
-    useAdminDashboardLiteStore((state) => state);
-
-  useEffect(() => {
-    if (!hasLoaded) {
-      void fetchDashboard();
-    }
-  }, [fetchDashboard, hasLoaded]);
+  const { isLoading: loading, data: stats = fallbackStats } = useDashboardApi();
 
   return (
     <div className={pageWrapClass}>

@@ -17,3 +17,4 @@ export const adminDashboardRouter = Router();
 adminDashboardRouter.use(requireAdmin);
 
 adminDashboardRouter.get("/dashboard/lite", adminDashboard);
+adminDashboardRouter.get("/dashboard", adminDashboard);
