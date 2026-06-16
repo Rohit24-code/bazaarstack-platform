@@ -89,7 +89,7 @@ export const homeStyles = {
     "group relative overflow-hidden rounded-[2rem] border border-border/30 bg-card shadow-xl transition-all duration-500 hover:shadow-2xl hover:shadow-primary/5",
   ),
   bannerMainImageClass: cn(
-    "h-[540px] w-full object-cover transition-all duration-700 group-hover:scale-105",
+    "h-[580px] w-full object-cover transition-all duration-700 group-hover:scale-105",
   ),
 
   bannerSideGridClass: cn("grid gap-6 sm:grid-cols-2 lg:grid-cols-1"),

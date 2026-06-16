@@ -1,4 +1,4 @@
-import { Button } from "@ecom/ui-core";
+import { Button, ThemeToggle } from "@ecom/ui-core";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -180,6 +180,8 @@ function CustomerNavbar() {
             <ShoppingCart className="h-4.5 w-4.5" />
             <span className={styles.cartBadge}>{cartItemsCount}</span>
           </div>
+
+          <ThemeToggle />
         </nav>
 
         <CustomerMobileNavbar isSignedIn={!!isSignedIn} />

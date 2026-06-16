@@ -29,3 +29,5 @@ export {
   FormMessage as FieldTitle,
   FormField,
 } from "./components/ui/form";
+export * from "./components/ThemeProvider";
+export * from "./components/ThemeToggle";
