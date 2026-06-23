@@ -34,5 +34,8 @@
     "@types/streamifier": "^0.1.2",
     "tsx": "^4.21.0",
     "typescript": "^6.0.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }
