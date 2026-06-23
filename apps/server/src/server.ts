@@ -1,3 +1,14 @@
+import crypto from "node:crypto";
+
+// 🛡️ Systems Guard: Polyfill global crypto context for legacy Node 18 env
+if (typeof globalThis.crypto === "undefined" || !globalThis.crypto.randomUUID) {
+  Object.defineProperty(globalThis, "crypto", {
+    value: crypto.webcrypto,
+    writable: false,
+    configurable: true,
+  });
+}
+
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
