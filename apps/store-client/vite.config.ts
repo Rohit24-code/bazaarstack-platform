@@ -1,56 +1,65 @@
 /// <reference types="vitest" />
-import { defineConfig } from "vitest/config";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import tsconfigPaths from "vite-tsconfig-paths";
 import federation from "@originjs/vite-plugin-federation";
 
-export default defineConfig({
-  root: __dirname,
-  base: "http://localhost:5175/",
-  plugins: [
-    react(),
-    tailwindcss(),
-    tsconfigPaths(),
-    federation({
-      name: "storefront",
-      filename: "remoteEntry.js",
-      exposes: {
-        "./StorefrontApp": "./src/StorefrontRemote.tsx",
-        /* 🚀 THE EXPOSED KEYS: These subpaths must align perfectly with your imports */
-        "./features/auth/useBootstrapAuth":
-          "./src/features/auth/useBootstrapAuth.ts",
-        "./components/ErrorModal": "./src/components/ErrorModal.tsx",
+export default defineConfig(({ mode }) => {
+  // Load environment variables based on current execution mode
+  const env = loadEnv(mode, process.cwd(), "");
+
+  // 🚀 DYNAMIC PRODUCTION BASE CONFIGURATION:
+  // If building on Vercel, use the active domain path. Otherwise, fall back to localhost.
+  const productionBaseUrl = env.VERCEL_URL
+    ? `https://${env.VERCEL_URL}/`
+    : "http://localhost:5175/";
+
+  return {
+    root: __dirname,
+    base: mode === "production" ? productionBaseUrl : "http://localhost:5175/",
+    plugins: [
+      react(),
+      tailwindcss(),
+      tsconfigPaths(),
+      federation({
+        name: "storefront",
+        filename: "remoteEntry.js",
+        exposes: {
+          "./StorefrontApp": "./src/StorefrontRemote.tsx",
+          "./features/auth/useBootstrapAuth":
+            "./src/features/auth/useBootstrapAuth.ts",
+          "./components/ErrorModal": "./src/components/ErrorModal.tsx",
+        },
+        shared: {
+          react: "^19.0.0",
+          "react-dom": "^19.0.0",
+          "react-router-dom": "^7.0.0",
+          "@clerk/react": "^5.0.0",
+        },
+      }),
+    ],
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "./src"),
+        "@store": path.resolve(__dirname, "./src"),
+        "@ecom/ui-core": path.resolve(__dirname, "../../packages/ui-core"),
       },
-      shared: {
-        react: "^19.0.0",
-        "react-dom": "^19.0.0",
-        "react-router-dom": "^7.0.0",
-        "@clerk/react": "^5.0.0",
-      },
-    }),
-  ],
-  resolve: {
-    /* 🚀 THE STABLE ALIAS MAP: Maps local @store/ requests cleanly to src/ for local compilation */
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-      "@store": path.resolve(__dirname, "./src"),
-      "@ecom/ui-core": path.resolve(__dirname, "../../packages/ui-core"),
+      extensions: [".tsx", ".ts", ".jsx", ".js", ".json"],
     },
-    extensions: [".tsx", ".ts", ".jsx", ".js", ".json"],
-  },
-  test: {
-    globals: true, // Enables global 'describe', 'test', and 'expect' blocks [cite: 200, 342]
-    environment: "jsdom", // Mimics browser DOM behaviors in the Node environment
-    setupFiles: "./src/setupTests.ts", // Points to your custom matchers registration script
-  },
-  server: {
-    port: 5175,
-    strictPort: true,
-    cors: true,
-    headers: { "Access-Control-Allow-Origin": "*" },
-  },
-  preview: { port: 5175, strictPort: true, cors: true },
-  build: { target: "esnext", minify: false, cssCodeSplit: false },
+    test: {
+      globals: true,
+      environment: "jsdom",
+      setupFiles: "./src/setupTests.ts",
+    },
+    server: {
+      port: 5175,
+      strictPort: true,
+      cors: true,
+      headers: { "Access-Control-Allow-Origin": "*" },
+    },
+    preview: { port: 5175, strictPort: true, cors: true },
+    build: { target: "esnext", minify: false, cssCodeSplit: false },
+  };
 });
