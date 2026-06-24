@@ -1,5 +1,5 @@
 /// <reference types="vitest" />
-import { defineConfig, loadEnv } from "vite";
+import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
@@ -7,18 +7,9 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import federation from "@originjs/vite-plugin-federation";
 
 export default defineConfig(({ mode }) => {
-  // Load environment variables based on current execution mode
-  const env = loadEnv(mode, process.cwd(), "");
-
-  // 🚀 DYNAMIC PRODUCTION BASE CONFIGURATION:
-  // If building on Vercel, use the active domain path. Otherwise, fall back to localhost.
-  const productionBaseUrl = env.VERCEL_URL
-    ? `https://${env.VERCEL_URL}/`
-    : "http://localhost:5175/";
-
   return {
     root: __dirname,
-    base: mode === "production" ? productionBaseUrl : "http://localhost:5175/",
+    base: mode === "production" ? "/" : "http://localhost:5175/",
     plugins: [
       react(),
       tailwindcss(),
