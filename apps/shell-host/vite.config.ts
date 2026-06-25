@@ -8,6 +8,8 @@ import federation from "@originjs/vite-plugin-federation";
 export default defineConfig(({ command, mode }) => {
   const isDev = command === "serve";
   const env = loadEnv(mode, process.cwd(), "");
+
+  // 🛡️ Explicit Cloud Container Identification Flags
   const isCloudCI = process.env.VERCEL === "1" || process.env.CI === "true";
 
   const plugins: any[] = [react(), tailwindcss()];
@@ -63,6 +65,7 @@ export default defineConfig(({ command, mode }) => {
       },
     });
   } else {
+    // 🌐 PRODUCTION REGISTRY SINGLETONS WITH CLEAN TYPINGS
     plugins.push(
       federation({
         name: "shell_host",
@@ -120,8 +123,14 @@ export default defineConfig(({ command, mode }) => {
       minify: false,
       cssCodeSplit: false,
       rollupOptions: {
-        // 🚀 THE REGEX SHIELD: Catch any nested imports matching storefront/* or admin_dashboard/* // and safely flag them as dynamic remote modules.
-        external: [/^storefront\/.*/, /^admin_dashboard\/.*/],
+        // 🚀 THE CRITICAL FIX: Explicitly mark deep-pathed remote components
+        // as external modules so Rollup handles them as runtime network requests
+        external: [
+          "storefront/StorefrontApp",
+          "admin_dashboard/AdminApp",
+          "storefront/components/ErrorModal",
+          "storefront/features/auth/useBootstrapAuth",
+        ],
       },
     },
   };
