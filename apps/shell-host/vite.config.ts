@@ -65,7 +65,7 @@ export default defineConfig(({ command, mode }) => {
       },
     });
   } else {
-    // 🌐 PRODUCTION REGISTRY SINGLETONS WITH CLEAN TYPINGS
+    // 🌐 PRODUCTION REGISTRY SINGLETONS WITH CLERK ALIGNED
     plugins.push(
       federation({
         name: "shell_host",
@@ -123,9 +123,13 @@ export default defineConfig(({ command, mode }) => {
       minify: false,
       cssCodeSplit: false,
       rollupOptions: {
-        // 🚀 THE CRITICAL FIX: Explicitly mark deep-pathed remote components
-        // as external modules so Rollup handles them as runtime network requests
+        // 🚀 THE FIX: Explicit strings are compatible with the federation plugin
+        // and force Rollup to bypass local disk checks for deep remote imports.
         external: [
+          "react",
+          "react-dom",
+          "react-router-dom",
+          "@clerk/react",
           "storefront/StorefrontApp",
           "admin_dashboard/AdminApp",
           "storefront/components/ErrorModal",
