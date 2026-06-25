@@ -9,7 +9,7 @@ export default defineConfig(({ command, mode }) => {
   const isDev = command === "serve";
   const env = loadEnv(mode, process.cwd(), "");
 
-  // 🛡️ Explicit Cloud Container Flags
+  // 🛡️ Explicit Cloud Container Identification Flags
   const isCloudCI = process.env.VERCEL === "1" || process.env.CI === "true";
 
   const plugins: any[] = [react(), tailwindcss()];
@@ -65,7 +65,7 @@ export default defineConfig(({ command, mode }) => {
       },
     });
   } else {
-    // 🌐 PRODUCTION REGISTRY SINGLETONS WITH CLERK DEFINED LEGITIMATELY
+    // 🌐 PRODUCTION REGISTRY SINGLETONS WITH CLEAN TYPINGS
     plugins.push(
       federation({
         name: "shell_host",
@@ -77,14 +77,12 @@ export default defineConfig(({ command, mode }) => {
             env.VITE_ADMIN_DASHBOARD_REMOTE_URL ||
             "http://localhost:5174/assets/remoteEntry.js",
         },
-        // 🚀 THE CORRECT SYNTAX: Passing them as standard keys with empty config objects
-        // This forces them to act as shared singletons without breaking the types or Rollup targets!
-        shared: {
-          react: {},
-          "react-dom": {},
-          "react-router-dom": {},
-          "@clerk/react": {},
-        },
+        shared: [
+          "react",
+          "react-dom",
+          "react-router-dom",
+          "@clerk/react",
+        ] as any,
       }),
     );
   }
@@ -93,6 +91,8 @@ export default defineConfig(({ command, mode }) => {
     root: __dirname,
     plugins,
     resolve: {
+      // 🚀 THE ALIAS SHIELD: Forces Vite to bypass tsconfig paths rules entirely
+      // when compiling your build targets on Vercel's remote infrastructure
       alias:
         isDev && !isCloudCI
           ? [
@@ -110,7 +110,7 @@ export default defineConfig(({ command, mode }) => {
               },
             ]
           : [
-              { find: "@", replacement: path.resolve(__dirname, "./src") },
+              { find: "@/", replacement: path.resolve(__dirname, "./src/") },
               {
                 find: "@ecom/ui-core",
                 replacement: path.resolve(__dirname, "../../packages/ui-core"),
@@ -124,10 +124,15 @@ export default defineConfig(({ command, mode }) => {
       target: "esnext",
       minify: false,
       cssCodeSplit: false,
-      // 🚨 CRITICAL FIX: Removed the "external" map block.
-      // The module federation plugin needs to physically intercept these imports at build time
-      // so it can create the runtime network-fetch pointers!
-      rollupOptions: {},
+      rollupOptions: {
+        // 🚀 THE FINAL BOUNDARY: Instructs Rollup explicitly that these paths are
+        // decoupled network modules so it shouldn't look for them on local drive paths!
+        external: [
+          "storefront/StorefrontApp",
+          "admin_dashboard/AdminApp",
+          "storefront/features/auth/useBootstrapAuth",
+        ],
+      },
     },
   };
 });
