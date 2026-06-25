@@ -9,12 +9,11 @@ export default defineConfig(({ command, mode }) => {
   const isDev = command === "serve";
   const env = loadEnv(mode, process.cwd(), "");
 
-  // 🛡️ Explicit Cloud Environment Identification Flag
+  // 🛡️ Explicit Cloud Container Flags
   const isCloudCI = process.env.VERCEL === "1" || process.env.CI === "true";
 
   const plugins: any[] = [react(), tailwindcss()];
 
-  // Only attach the custom local filesystem resolver if we are running standard local dev server
   if (isDev && !isCloudCI) {
     plugins.push({
       name: "monorepo-alias-resolver",
@@ -66,7 +65,7 @@ export default defineConfig(({ command, mode }) => {
       },
     });
   } else {
-    // 🌐 STRICT PRODUCTION BUILD MODE: Defer entirely to Module Federation URL paths
+    // 🌐 FIXED COMPILATION: Natively mapped parameters for @originjs/vite-plugin-federation
     plugins.push(
       federation({
         name: "shell_host",
@@ -78,12 +77,7 @@ export default defineConfig(({ command, mode }) => {
             env.VITE_ADMIN_DASHBOARD_REMOTE_URL ||
             "http://localhost:5174/assets/remoteEntry.js",
         },
-        shared: {
-          react: "^19.0.0",
-          "react-dom": "^19.0.0",
-          "react-router-dom": "^7.0.0",
-          "@clerk/react": "^5.0.0",
-        },
+        shared: ["react", "react-dom", "react-router-dom", "@clerk/react"],
       }),
     );
   }
@@ -92,8 +86,6 @@ export default defineConfig(({ command, mode }) => {
     root: __dirname,
     plugins,
     resolve: {
-      // 🚀 THE MAGIC MATRIX: If building on Vercel, rewrite all sibling folder mappings
-      // straight into external Federated keys so Rollup never tries to read local disk files!
       alias:
         isDev && !isCloudCI
           ? [
@@ -125,9 +117,12 @@ export default defineConfig(({ command, mode }) => {
       target: "esnext",
       minify: false,
       cssCodeSplit: false,
-      // 🛡️ Bypass Rollup strict validation for remote federated assets during cloud production compilation
       rollupOptions: {
-        external: ["storefront/StorefrontApp", "admin_dashboard/AdminApp"],
+        external: [
+          "storefront/StorefrontApp",
+          "admin_dashboard/AdminApp",
+          "storefront/features/auth/useBootstrapAuth",
+        ],
       },
     },
   };
