@@ -8,8 +8,6 @@ import federation from "@originjs/vite-plugin-federation";
 export default defineConfig(({ command, mode }) => {
   const isDev = command === "serve";
   const env = loadEnv(mode, process.cwd(), "");
-
-  // 🛡️ Explicit Cloud Container Identification Flags
   const isCloudCI = process.env.VERCEL === "1" || process.env.CI === "true";
 
   const plugins: any[] = [react(), tailwindcss()];
@@ -65,7 +63,6 @@ export default defineConfig(({ command, mode }) => {
       },
     });
   } else {
-    // 🌐 PRODUCTION REGISTRY SINGLETONS WITH CLEAN TYPINGS
     plugins.push(
       federation({
         name: "shell_host",
@@ -91,8 +88,6 @@ export default defineConfig(({ command, mode }) => {
     root: __dirname,
     plugins,
     resolve: {
-      // 🚀 THE ALIAS SHIELD: Forces Vite to bypass tsconfig paths rules entirely
-      // when compiling your build targets on Vercel's remote infrastructure
       alias:
         isDev && !isCloudCI
           ? [
@@ -125,13 +120,8 @@ export default defineConfig(({ command, mode }) => {
       minify: false,
       cssCodeSplit: false,
       rollupOptions: {
-        // 🚀 THE FINAL BOUNDARY: Instructs Rollup explicitly that these paths are
-        // decoupled network modules so it shouldn't look for them on local drive paths!
-        external: [
-          "storefront/StorefrontApp",
-          "admin_dashboard/AdminApp",
-          "storefront/features/auth/useBootstrapAuth",
-        ],
+        // 🚀 THE REGEX SHIELD: Catch any nested imports matching storefront/* or admin_dashboard/* // and safely flag them as dynamic remote modules.
+        external: [/^storefront\/.*/, /^admin_dashboard\/.*/],
       },
     },
   };
