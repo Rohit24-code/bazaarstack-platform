@@ -1,13 +1,16 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import fs from "fs";
 import federation from "@originjs/vite-plugin-federation";
 
-export default defineConfig(({ command }) => {
+export default defineConfig(({ command, mode }) => {
   // Check if we are running local dev server (vite) or production build (vite build)
   const isDev = command === "serve";
+
+  // Load environment variables from the platform runtime environment
+  const env = loadEnv(mode, process.cwd(), "");
 
   const plugins: any[] = [react(), tailwindcss()];
 
@@ -75,8 +78,13 @@ export default defineConfig(({ command }) => {
       federation({
         name: "shell_host",
         remotes: {
-          storefront: "http://localhost:5175/assets/remoteEntry.js",
-          admin_dashboard: "http://localhost:5174/assets/remoteEntry.js",
+          // 🚀 DYNAMIC INJECTION: Reads the production domains on Vercel, falls back to localhost if empty
+          storefront:
+            env.VITE_STORE_CLIENT_REMOTE_URL ||
+            "http://localhost:5175/assets/remoteEntry.js",
+          admin_dashboard:
+            env.VITE_ADMIN_DASHBOARD_REMOTE_URL ||
+            "http://localhost:5174/assets/remoteEntry.js",
         },
         shared: {
           react: "^19.0.0",
