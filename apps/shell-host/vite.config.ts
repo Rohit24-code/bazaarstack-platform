@@ -6,21 +6,20 @@ import fs from "fs";
 import federation from "@originjs/vite-plugin-federation";
 
 export default defineConfig(({ command, mode }) => {
-  // Check if we are running local dev server (vite) or production build (vite build)
   const isDev = command === "serve";
-
-  // Load environment variables from the platform runtime environment
   const env = loadEnv(mode, process.cwd(), "");
+
+  // 🛡️ Explicit Cloud Environment Identification Flag
+  const isCloudCI = process.env.VERCEL === "1" || process.env.CI === "true";
 
   const plugins: any[] = [react(), tailwindcss()];
 
-  if (isDev) {
-    // 🚧 DEV MODE: Physical paths and monolithic compilation
+  // Only attach the custom local filesystem resolver if we are running standard local dev server
+  if (isDev && !isCloudCI) {
     plugins.push({
       name: "monorepo-alias-resolver",
       enforce: "pre",
       resolveId(source: any, importer: any) {
-        // Direct physical mapping for root App remotes used in router.tsx
         if (source === "storefront/StorefrontApp") {
           return path.resolve(
             __dirname,
@@ -34,10 +33,9 @@ export default defineConfig(({ command, mode }) => {
           );
         }
 
-        // Context-aware resolver for nested @/ paths
         if (source.startsWith("@/")) {
           const subPath = source.slice(2);
-          let targetDir = path.resolve(__dirname, "./src"); // Default shell-host
+          let targetDir = path.resolve(__dirname, "./src");
 
           if (importer && importer.includes("/store-client/")) {
             targetDir = path.resolve(__dirname, "../store-client/src");
@@ -46,8 +44,6 @@ export default defineConfig(({ command, mode }) => {
           }
 
           const targetPath = path.resolve(targetDir, subPath);
-
-          // Manually check physical extensions since Vite expects fully resolved paths from plugins
           const extensions = [
             "",
             ".ts",
@@ -58,8 +54,6 @@ export default defineConfig(({ command, mode }) => {
             ".json",
             "/index.ts",
             "/index.tsx",
-            "/index.js",
-            "/index.jsx",
           ];
 
           for (const ext of extensions) {
@@ -67,18 +61,16 @@ export default defineConfig(({ command, mode }) => {
               return targetPath + ext;
             }
           }
-
-          return null; // Let Vite handle/fail if not found
+          return null;
         }
       },
     });
   } else {
-    // 🌐 BUILD MODE: True Module Federation across network boundaries
+    // 🌐 STRICT PRODUCTION BUILD MODE: Defer entirely to Module Federation URL paths
     plugins.push(
       federation({
         name: "shell_host",
         remotes: {
-          // 🚀 DYNAMIC INJECTION: Reads the production domains on Vercel, falls back to localhost if empty
           storefront:
             env.VITE_STORE_CLIENT_REMOTE_URL ||
             "http://localhost:5175/assets/remoteEntry.js",
@@ -100,62 +92,43 @@ export default defineConfig(({ command, mode }) => {
     root: __dirname,
     plugins,
     resolve: {
-      alias: isDev
-        ? [
-            {
-              find: "@ecom/ui-core",
-              replacement: path.resolve(__dirname, "../../packages/ui-core"),
-            },
-            {
-              find: "@store",
-              replacement: path.resolve(__dirname, "../store-client/src"),
-            },
-            {
-              find: "@admin",
-              replacement: path.resolve(__dirname, "../admin-dashboard/src"),
-            },
-          ]
-        : [
-            { find: "@", replacement: path.resolve(__dirname, "./src") },
-            {
-              find: "@ecom/ui-core",
-              replacement: path.resolve(__dirname, "../../packages/ui-core"),
-            },
-            { find: "@store", replacement: "storefront" }, // Maps alias to federation remote key
-            { find: "@admin", replacement: "admin_dashboard" }, // Maps alias to federation remote key
-          ],
+      // 🚀 THE MAGIC MATRIX: If building on Vercel, rewrite all sibling folder mappings
+      // straight into external Federated keys so Rollup never tries to read local disk files!
+      alias:
+        isDev && !isCloudCI
+          ? [
+              {
+                find: "@ecom/ui-core",
+                replacement: path.resolve(__dirname, "../../packages/ui-core"),
+              },
+              {
+                find: "@store",
+                replacement: path.resolve(__dirname, "../store-client/src"),
+              },
+              {
+                find: "@admin",
+                replacement: path.resolve(__dirname, "../admin-dashboard/src"),
+              },
+            ]
+          : [
+              { find: "@", replacement: path.resolve(__dirname, "./src") },
+              {
+                find: "@ecom/ui-core",
+                replacement: path.resolve(__dirname, "../../packages/ui-core"),
+              },
+              { find: "@store", replacement: "storefront" },
+              { find: "@admin", replacement: "admin_dashboard" },
+            ],
       extensions: [".tsx", ".ts", ".jsx", ".js", ".json", ".css"],
-    },
-
-    server: {
-      port: 5173,
-      strictPort: true,
-      cors: true,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-      },
-      proxy: {
-        "/storefront-assets": {
-          target: "http://localhost:5175",
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/storefront-assets/, "/assets"),
-        },
-        "/admin-assets": {
-          target: "http://localhost:5174",
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/admin-assets/, "/assets"),
-        },
-      },
-    },
-    preview: {
-      port: 5173,
-      strictPort: true,
-      cors: true,
     },
     build: {
       target: "esnext",
       minify: false,
       cssCodeSplit: false,
+      // 🛡️ Bypass Rollup strict validation for remote federated assets during cloud production compilation
+      rollupOptions: {
+        external: ["storefront/StorefrontApp", "admin_dashboard/AdminApp"],
+      },
     },
   };
 });
