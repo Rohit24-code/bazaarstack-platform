@@ -65,7 +65,7 @@ export default defineConfig(({ command, mode }) => {
       },
     });
   } else {
-    // 🌐 FIXED COMPILATION: Natively mapped parameters for @originjs/vite-plugin-federation
+    // 🌐 PRODUCTION REGISTRY SINGLETONS WITH CLERK DEFINED LEGITIMATELY
     plugins.push(
       federation({
         name: "shell_host",
@@ -77,7 +77,14 @@ export default defineConfig(({ command, mode }) => {
             env.VITE_ADMIN_DASHBOARD_REMOTE_URL ||
             "http://localhost:5174/assets/remoteEntry.js",
         },
-        shared: ["react", "react-dom", "react-router-dom", "@clerk/react"],
+        // 🚀 THE CORRECT SYNTAX: Passing them as standard keys with empty config objects
+        // This forces them to act as shared singletons without breaking the types or Rollup targets!
+        shared: {
+          react: {},
+          "react-dom": {},
+          "react-router-dom": {},
+          "@clerk/react": {},
+        },
       }),
     );
   }
@@ -117,13 +124,10 @@ export default defineConfig(({ command, mode }) => {
       target: "esnext",
       minify: false,
       cssCodeSplit: false,
-      rollupOptions: {
-        external: [
-          "storefront/StorefrontApp",
-          "admin_dashboard/AdminApp",
-          "storefront/features/auth/useBootstrapAuth",
-        ],
-      },
+      // 🚨 CRITICAL FIX: Removed the "external" map block.
+      // The module federation plugin needs to physically intercept these imports at build time
+      // so it can create the runtime network-fetch pointers!
+      rollupOptions: {},
     },
   };
 });
