@@ -19,9 +19,8 @@ export default defineConfig(({ mode }) => {
         filename: "remoteEntry.js",
         exposes: {
           "./StorefrontApp": "./src/StorefrontRemote.tsx",
-          "./features/auth/useBootstrapAuth":
-            "./src/features/auth/useBootstrapAuth.ts",
-          "./components/ErrorModal": "./src/components/ErrorModal.tsx",
+          "./useBootstrapAuth": "./src/features/auth/useBootstrapAuth.ts",
+          "./ErrorModal": "./src/components/ErrorModal.tsx",
         },
         shared: {
           react: "^19.0.0",

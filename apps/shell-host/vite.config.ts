@@ -133,14 +133,14 @@ export default defineConfig(({ command, mode }) => {
               },
 
               // 🎯 Clean Production Replacements mapped to Federation Targets
-              {
-                find: "@store/components/ErrorModal",
-                replacement: "storefront/ErrorModal",
-              },
-              {
-                find: "@store/features/auth/useBootstrapAuth",
-                replacement: "storefront/useBootstrapAuth",
-              },
+              // {
+              //   find: "@store/components/ErrorModal",
+              //   replacement: "storefront/ErrorModal",
+              // },
+              // {
+              //   find: "@store/features/auth/useBootstrapAuth",
+              //   replacement: "storefront/useBootstrapAuth",
+              // },
               { find: "@store", replacement: "storefront" },
               { find: "@admin", replacement: "admin_dashboard" },
             ],

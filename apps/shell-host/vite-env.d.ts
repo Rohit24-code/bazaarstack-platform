@@ -7,7 +7,7 @@ declare module "storefront/StorefrontApp" {
 }
 
 declare module "storefront/useBootstrapAuth" {
-  export const useBootstrapAuth: () => any; // Adjust type signature match later if needed
+  export const useBootStrapAuth: () => any; // Adjust type signature match later if needed
 }
 
 declare module "storefront/ErrorModal" {
