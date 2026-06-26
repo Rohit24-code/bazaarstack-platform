@@ -1,21 +1,21 @@
-import { useErrorStore } from "@/components/useErrorStore"
-import { AlertCircle } from "lucide-react"
-import { useEffect } from "react"
-import { toast } from "sonner"
+import { useErrorStore } from "@/components/useErrorStore";
+import { AlertCircle } from "lucide-react";
+import { useEffect } from "react";
+import { toast } from "sonner";
 
-export function ErrorModal() {
-  const { isOpen, errorMessage, isSuccess, closeError } = useErrorStore()
+export default function ErrorModal() {
+  const { isOpen, errorMessage, isSuccess, closeError } = useErrorStore();
 
   useEffect(() => {
     if (isOpen && isSuccess) {
       toast.success("Success", {
         description: errorMessage,
-      })
-      closeError()
+      });
+      closeError();
     }
-  }, [isOpen, isSuccess, errorMessage, closeError])
+  }, [isOpen, isSuccess, errorMessage, closeError]);
 
-  if (!isOpen || isSuccess) return null
+  if (!isOpen || isSuccess) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
@@ -42,5 +42,5 @@ export function ErrorModal() {
         </div>
       </div>
     </div>
-  )
+  );
 }

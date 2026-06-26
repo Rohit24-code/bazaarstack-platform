@@ -4,8 +4,7 @@ import { RouterProvider } from "react-router-dom";
 import { router } from "./router";
 import { ClerkProvider } from "@clerk/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useBootStrapAuth } from "storefront/useBootstrapAuth";
-import { ErrorModal } from "storefront/ErrorModal";
+import { useBootStrapAuth, ErrorModal } from "storefront";
 import { Toaster, ThemeProvider } from "@ecom/ui-core";
 
 import "@ecom/ui-core/src/index.css";
