@@ -8,11 +8,16 @@ import federation from "@originjs/vite-plugin-federation";
 export default defineConfig(({ command, mode }) => {
   const isDev = command === "serve";
   const env = loadEnv(mode, process.cwd(), "");
-
-  // 🛡️ Explicit Cloud Container Identification Flags
   const isCloudCI = process.env.VERCEL === "1" || process.env.CI === "true";
 
   const plugins: any[] = [react(), tailwindcss()];
+
+  const storefrontUrl =
+    env.VITE_STORE_CLIENT_REMOTE_URL ||
+    "http://localhost:5175/assets/remoteEntry.js";
+  const adminUrl =
+    env.VITE_ADMIN_DASHBOARD_REMOTE_URL ||
+    "http://localhost:5174/assets/remoteEntry.js";
 
   if (isDev && !isCloudCI) {
     plugins.push({
@@ -65,17 +70,13 @@ export default defineConfig(({ command, mode }) => {
       },
     });
   } else {
-    // 🌐 PRODUCTION REGISTRY SINGLETONS WITH CLERK ALIGNED
+    // 🌐 PRODUCTION PLUGINS
     plugins.push(
       federation({
         name: "shell_host",
         remotes: {
-          storefront:
-            env.VITE_STORE_CLIENT_REMOTE_URL ||
-            "http://localhost:5175/assets/remoteEntry.js",
-          admin_dashboard:
-            env.VITE_ADMIN_DASHBOARD_REMOTE_URL ||
-            "http://localhost:5174/assets/remoteEntry.js",
+          storefront: storefrontUrl,
+          admin_dashboard: adminUrl,
         },
         shared: [
           "react",
@@ -85,6 +86,35 @@ export default defineConfig(({ command, mode }) => {
         ] as any,
       }),
     );
+
+    // 🚀 THE PASS-THROUGH RESOLVER:
+    // This plugin catches deep remote subpaths before Rollup checks the disk,
+    // converting alias shorthand forms and marking them external cleanly.
+    plugins.push({
+      name: "production-subpath-resolver",
+      enforce: "pre",
+      resolveId(source: string) {
+        if (source.startsWith("@store/")) {
+          return {
+            id: source.replace("@store/", "storefront/"),
+            external: true,
+          };
+        }
+        if (source.startsWith("@admin/")) {
+          return {
+            id: source.replace("@admin/", "admin_dashboard/"),
+            external: true,
+          };
+        }
+        if (
+          source.startsWith("storefront/") ||
+          source.startsWith("admin_dashboard/")
+        ) {
+          return { id: source, external: true };
+        }
+        return null;
+      },
+    });
   }
 
   return {
@@ -113,13 +143,9 @@ export default defineConfig(({ command, mode }) => {
                 find: "@ecom/ui-core",
                 replacement: path.resolve(__dirname, "../../packages/ui-core"),
               },
-              // { find: "@store", replacement: "storefront" },
-              // { find: "@admin", replacement: "admin_dashboard" },
-              { find: /^storefront\/(.*)/, replacement: "storefront/$1" },
-              {
-                find: /^admin_dashboard\/(.*)/,
-                replacement: "admin_dashboard/$1",
-              },
+              // Clean base mapping variables
+              { find: "@store", replacement: "storefront" },
+              { find: "@admin", replacement: "admin_dashboard" },
             ],
       extensions: [".tsx", ".ts", ".jsx", ".js", ".json", ".css"],
     },
@@ -128,20 +154,7 @@ export default defineConfig(({ command, mode }) => {
       minify: false,
       cssCodeSplit: false,
       rollupOptions: {
-        // 🚀 THE FIX: Explicit strings are compatible with the federation plugin
-        // and force Rollup to bypass local disk checks for deep remote imports.
-        external: [
-          "react",
-          "react-dom",
-          "react-router-dom",
-          "@clerk/react",
-          "storefront/StorefrontApp",
-          "admin_dashboard/AdminApp",
-          "storefront/components/ErrorModal",
-          "@store/components/ErrorModal",
-          "storefront/features/auth/useBootstrapAuth",
-          "@store/features/auth/useBootstrapAuth",
-        ],
+        external: ["react", "react-dom", "react-router-dom", "@clerk/react"],
       },
     },
   };
