@@ -11,9 +11,10 @@ import {
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ApiProvider } from "../../context/apiContext"; // Aligned to your path casing: apiContext
 import { useBootStrapAuth } from "@/features/auth/useBootstrapAuth";
+import ErrorModal from "../ErrorModal";
 
 export default function CustomerLayout() {
-  // useBootStrapAuth();
+  useBootStrapAuth();
 
   let hasParentQueryClient = false;
   try {
@@ -45,6 +46,7 @@ export default function CustomerLayout() {
         {/*  The dynamic portal where your collections page mounts safely! */}
         <Outlet />
       </main>
+      <ErrorModal />
     </div>
   );
 

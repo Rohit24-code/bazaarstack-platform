@@ -4,7 +4,7 @@ import { RouterProvider } from "react-router-dom";
 import { router } from "./router";
 import { ClerkProvider } from "@clerk/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useBootStrapAuth, ErrorModal } from "storefront";
+
 import { Toaster, ThemeProvider } from "@ecom/ui-core";
 
 import "@ecom/ui-core/src/index.css";
@@ -20,12 +20,10 @@ const queryClient = new QueryClient({
 
 // A wrapper component to safely execute hooks inside the React application tree
 function ShellRoot() {
-  useBootStrapAuth();
-
   return (
     <>
       <RouterProvider router={router} />
-      <ErrorModal />
+
       <Toaster />
     </>
   );

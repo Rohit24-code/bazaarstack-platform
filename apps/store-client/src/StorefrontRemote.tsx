@@ -5,9 +5,6 @@ import { Routes, Route } from "react-router-dom";
 import CustomerLayout from "./components/layout/CustomerLayout";
 import ProtectedLayout from "./components/auth/ProtectedLayout";
 
-export { useBootStrapAuth } from "./features/auth/useBootstrapAuth";
-export { default as ErrorModal } from "./components/ErrorModal";
-
 const SignInPage = lazy(() =>
   import("./pages/auth/SignInPage").then((m) => ({
     default: m.SignInPage,

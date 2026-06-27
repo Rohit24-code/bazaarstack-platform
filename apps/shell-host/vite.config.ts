@@ -118,8 +118,7 @@ export default defineConfig(({ command, mode }) => {
               find: "@ecom/ui-core",
               replacement: path.resolve(__dirname, "../../packages/ui-core"),
             },
-            { find: "storefront/useBootstrapAuth", replacement: "storefront" },
-            { find: "storefront/ErrorModal", replacement: "storefront" },
+
             { find: "@store", replacement: "storefront" },
             { find: "@admin", replacement: "admin_dashboard" },
           ],

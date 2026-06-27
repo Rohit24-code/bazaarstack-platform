@@ -5,11 +5,14 @@ import {
   removeCustomerWishlistItem,
 } from "../api";
 import { AddCustomerWishlistItemBody } from "../types";
+import { useAuth } from "@clerk/react";
 
 export const useCustomerWishListQuery = () => {
+  const { isLoaded, isSignedIn } = useAuth();
   return useQuery({
     queryKey: ["customer", "wishlist", "get"],
     queryFn: () => getCustomerWishlist(),
+    enabled: !!isLoaded && !!isSignedIn,
   });
 };
 
