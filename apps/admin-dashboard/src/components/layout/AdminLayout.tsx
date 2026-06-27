@@ -10,8 +10,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { ThemeToggle } from "@ecom/ui-core";
-import { ErrorModal } from "../ErrorModal";
+import { ThemeToggle, ThemeProvider } from "@ecom/ui-core"; // 🚀 IMPORT THEMEPROVIDER HERE TOO!
 
 function AdminInitializer({ children }: { children: React.ReactNode }) {
   useBootStrapAuth();
@@ -58,24 +57,26 @@ function AdminLayout() {
           </main>
         </div>
       </div>
-      <ErrorModal />
     </div>
   );
 
   return (
-    <ApiProvider baseUrl={gatewayUrl}>
-      {localQueryClient ? (
-        <QueryClientProvider client={localQueryClient}>
-          {/* ✅ Safe execution inside the context lifecycle */}
-          <AdminInitializer>
-            {layoutContent}
-            <ReactQueryDevtools initialIsOpen={false} />
-          </AdminInitializer>
-        </QueryClientProvider>
-      ) : (
-        <AdminInitializer>{layoutContent}</AdminInitializer>
-      )}
-    </ApiProvider>
+    // 🎯 WRAP EVERYTHING NATIVELY IN THEMEPROVIDER HERE
+    // This provides a local memory reference for the theme context that matches this chunk's ThemeToggle!
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <ApiProvider baseUrl={gatewayUrl}>
+        {localQueryClient ? (
+          <QueryClientProvider client={localQueryClient}>
+            <AdminInitializer>
+              {layoutContent}
+              <ReactQueryDevtools initialIsOpen={false} />
+            </AdminInitializer>
+          </QueryClientProvider>
+        ) : (
+          <AdminInitializer>{layoutContent}</AdminInitializer>
+        )}
+      </ApiProvider>
+    </ThemeProvider>
   );
 }
 

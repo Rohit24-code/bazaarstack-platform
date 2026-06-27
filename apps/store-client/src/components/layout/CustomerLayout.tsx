@@ -12,6 +12,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ApiProvider } from "../../context/apiContext";
 import { useBootStrapAuth } from "@/features/auth/useBootstrapAuth";
 import ErrorModal from "../ErrorModal";
+import { ThemeProvider } from "@ecom/ui-core";
 
 function StorefrontInitializer({ children }: { children: React.ReactNode }) {
   useBootStrapAuth();
@@ -54,18 +55,20 @@ export default function CustomerLayout() {
 
   return (
     <ApiProvider baseUrl={gatewayUrl}>
-      {localQueryClient ? (
-        <QueryClientProvider client={localQueryClient}>
-          {/* ✅ Wrap layout content so the hook runs AFTER the client is set */}
-          <StorefrontInitializer>
-            {layoutContent}
-            <ReactQueryDevtools initialIsOpen={false} />
-          </StorefrontInitializer>
-        </QueryClientProvider>
-      ) : (
-        /* ✅ If the host app already provides a QueryClient, wrap it here too */
-        <StorefrontInitializer>{layoutContent}</StorefrontInitializer>
-      )}
+      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        {localQueryClient ? (
+          <QueryClientProvider client={localQueryClient}>
+            {/* ✅ Wrap layout content so the hook runs AFTER the client is set */}
+            <StorefrontInitializer>
+              {layoutContent}
+              <ReactQueryDevtools initialIsOpen={false} />
+            </StorefrontInitializer>
+          </QueryClientProvider>
+        ) : (
+          /* ✅ If the host app already provides a QueryClient, wrap it here too */
+          <StorefrontInitializer>{layoutContent}</StorefrontInitializer>
+        )}
+      </ThemeProvider>
     </ApiProvider>
   );
 }
