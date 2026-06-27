@@ -9,13 +9,16 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { ApiProvider } from "../../context/apiContext"; // Aligned to your path casing: apiContext
+import { ApiProvider } from "../../context/apiContext";
 import { useBootStrapAuth } from "@/features/auth/useBootstrapAuth";
 import ErrorModal from "../ErrorModal";
 
-export default function CustomerLayout() {
+function StorefrontInitializer({ children }: { children: React.ReactNode }) {
   useBootStrapAuth();
+  return <>{children}</>;
+}
 
+export default function CustomerLayout() {
   let hasParentQueryClient = false;
   try {
     hasParentQueryClient = !!useQueryClient();
@@ -43,7 +46,6 @@ export default function CustomerLayout() {
     <div className="min-h-screen bg-background text-foreground">
       <CustomerNavbar />
       <main className="mx-auto max-w-7xl px-4 py-8">
-        {/*  The dynamic portal where your collections page mounts safely! */}
         <Outlet />
       </main>
       <ErrorModal />
@@ -54,11 +56,15 @@ export default function CustomerLayout() {
     <ApiProvider baseUrl={gatewayUrl}>
       {localQueryClient ? (
         <QueryClientProvider client={localQueryClient}>
-          {layoutContent}
-          <ReactQueryDevtools initialIsOpen={false} />
+          {/* ✅ Wrap layout content so the hook runs AFTER the client is set */}
+          <StorefrontInitializer>
+            {layoutContent}
+            <ReactQueryDevtools initialIsOpen={false} />
+          </StorefrontInitializer>
         </QueryClientProvider>
       ) : (
-        layoutContent
+        /* ✅ If the host app already provides a QueryClient, wrap it here too */
+        <StorefrontInitializer>{layoutContent}</StorefrontInitializer>
       )}
     </ApiProvider>
   );

@@ -4,7 +4,6 @@ import { RouterProvider } from "react-router-dom";
 import { router } from "./router";
 import { ClerkProvider } from "@clerk/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
 import { Toaster, ThemeProvider } from "@ecom/ui-core";
 
 import "@ecom/ui-core/src/index.css";
@@ -18,17 +17,6 @@ const queryClient = new QueryClient({
   },
 });
 
-// A wrapper component to safely execute hooks inside the React application tree
-function ShellRoot() {
-  return (
-    <>
-      <RouterProvider router={router} />
-
-      <Toaster />
-    </>
-  );
-}
-
 createRoot(document.getElementById("root")!).render(
   <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
     <StrictMode>
@@ -36,7 +24,9 @@ createRoot(document.getElementById("root")!).render(
         <ClerkProvider
           publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}
         >
-          <ShellRoot />
+          {/* 🚀 Mount the router provider directly inside your clean provider wrapper stack */}
+          <RouterProvider router={router} />
+          <Toaster />
         </ClerkProvider>
       </QueryClientProvider>
     </StrictMode>

@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Outlet } from "react-router-dom";
 import AdminSidebar from "../admin/common/Sidebar";
 import { UserButton } from "@clerk/react";
@@ -8,13 +9,16 @@ import {
   QueryClientProvider,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useMemo } from "react";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ThemeToggle } from "@ecom/ui-core";
+import { ErrorModal } from "../ErrorModal";
+
+function AdminInitializer({ children }: { children: React.ReactNode }) {
+  useBootStrapAuth();
+  return <>{children}</>;
+}
 
 function AdminLayout() {
-  // useBootStrapAuth();
-
   let hasParentQueryClient = false;
   try {
     hasParentQueryClient = !!useQueryClient();
@@ -54,6 +58,7 @@ function AdminLayout() {
           </main>
         </div>
       </div>
+      <ErrorModal />
     </div>
   );
 
@@ -61,11 +66,14 @@ function AdminLayout() {
     <ApiProvider baseUrl={gatewayUrl}>
       {localQueryClient ? (
         <QueryClientProvider client={localQueryClient}>
-          {layoutContent}
-          <ReactQueryDevtools initialIsOpen={false} />
+          {/* ✅ Safe execution inside the context lifecycle */}
+          <AdminInitializer>
+            {layoutContent}
+            <ReactQueryDevtools initialIsOpen={false} />
+          </AdminInitializer>
         </QueryClientProvider>
       ) : (
-        layoutContent
+        <AdminInitializer>{layoutContent}</AdminInitializer>
       )}
     </ApiProvider>
   );
