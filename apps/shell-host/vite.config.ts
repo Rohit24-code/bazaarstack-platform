@@ -91,6 +91,10 @@ export default defineConfig(({ command, mode }) => {
 
   return {
     root: __dirname,
+
+    // 🔒 FIX 1: Explicitly force absolute root asset addressing for production routing
+    base: "/",
+
     plugins,
     server: {
       port: 5173,
@@ -118,7 +122,6 @@ export default defineConfig(({ command, mode }) => {
               find: "@ecom/ui-core",
               replacement: path.resolve(__dirname, "../../packages/ui-core"),
             },
-
             { find: "@store", replacement: "storefront" },
             { find: "@admin", replacement: "admin_dashboard" },
           ],
@@ -128,17 +131,10 @@ export default defineConfig(({ command, mode }) => {
       target: "esnext",
       minify: false,
       cssCodeSplit: false,
+
+      // 🔒 FIX 2: Clear manual externals so the Federation Engine can link properly
       rollupOptions: {
-        // 🚀 THE FINAL FIX: Explicitly add 'storefront' and 'admin_dashboard' here
-        // so Rollup knows they are external runtime remotes and builds cleanly!
-        external: [
-          "react",
-          "react-dom",
-          "react-router-dom",
-          "@clerk/react",
-          "storefront",
-          "admin_dashboard",
-        ],
+        external: [],
       },
     },
   };
