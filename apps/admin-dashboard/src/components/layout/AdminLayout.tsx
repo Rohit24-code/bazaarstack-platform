@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Outlet } from "react-router-dom";
 import AdminSidebar from "../admin/common/Sidebar";
-import { UserButton } from "@clerk/react";
+import { useAuth, UserButton } from "@clerk/react";
 import { useBootStrapAuth } from "@/features/auth/useBootstrapAuth";
 import { ApiProvider } from "@/context/apiContext";
 import {
@@ -11,6 +11,8 @@ import {
 } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ThemeToggle, ThemeProvider } from "@ecom/ui-core"; // 🚀 IMPORT THEMEPROVIDER HERE TOO!
+import { LogIn } from "lucide-react";
+import { NavTextLink } from "../common/NavTextLink";
 
 function AdminInitializer({ children }: { children: React.ReactNode }) {
   useBootStrapAuth();
@@ -18,6 +20,7 @@ function AdminInitializer({ children }: { children: React.ReactNode }) {
 }
 
 function AdminLayout() {
+  const { isSignedIn } = useAuth();
   let hasParentQueryClient = false;
   try {
     hasParentQueryClient = !!useQueryClient();
@@ -49,7 +52,11 @@ function AdminLayout() {
           <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border px-4 backdrop-blur-2xl lg:px-6">
             <div className="ml-auto flex items-center gap-2">
               <ThemeToggle />
-              <UserButton />
+              {isSignedIn ? (
+                <UserButton />
+              ) : (
+                <NavTextLink href="/sign-in" label="Login" icon={LogIn} />
+              )}
             </div>
           </header>
           <main className="flex-1">

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "@clerk/react";
+import { SignIn, useAuth } from "@clerk/react";
 import { Routes, Route } from "react-router-dom";
 import { injectAuthHeaderGetter } from "./lib/api";
 import AdminLayout from "./components/layout/AdminLayout";
@@ -36,6 +36,7 @@ export default function AdminRemote() {
 
   return (
     <Routes>
+      <Route path="sign-in" element={<SignIn />} />
       <Route element={<AdminLayout />}>
         <Route element={<AdminProtectedLayout />}>
           <Route index element={<AdminDashboardHome />} />

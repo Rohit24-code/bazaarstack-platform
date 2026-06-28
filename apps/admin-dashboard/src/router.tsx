@@ -5,6 +5,7 @@ import AdminProducts from "./pages/admin/Products";
 import AdminOrders from "./pages/admin/Orders";
 import AdminCoupons from "./pages/admin/Promos";
 import AdminSettings from "./pages/admin/Settings";
+import { SignInPage } from "./pages/auth/SignInPage";
 
 // 🚀 Localized Sub-Router: Completely isolated from consumer logic!
 export const adminRouter = createBrowserRouter([
@@ -23,4 +24,5 @@ export const adminRouter = createBrowserRouter([
       { path: "settings", element: <AdminSettings /> },
     ],
   },
+  { path: "sign-in", element: <SignInPage /> },
 ]);
